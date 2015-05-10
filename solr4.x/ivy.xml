@@ -1,0 +1,21 @@
+<ivy-module version="2.0">
+  <info organisation="com.lucidworks.demo" module="autophrase-tokenfilter"/>
+  
+  <configurations defaultconfmapping="default">
+    <conf name="default" extends="compile"/>
+    <conf name="compile"/>
+    <conf name="test" extends="compile" visibility="private"/>
+  </configurations>
+
+  <dependencies>
+    <dependency org="org.apache.lucene" name="lucene-analyzers-common" rev="${lucene.version}" conf="compile->default"/>
+    <dependency org="org.apache.solr" name="solr-test-framework" rev="${lucene.version}" conf="test->default" />
+    <dependency org="org.apache.lucene" name="lucene-core" rev="${lucene.version}" conf="compile->default"/>
+    <dependency org="org.apache.lucene" name="lucene-codecs" rev="${lucene.version}" conf="compile->default"/>
+    <dependency org="org.apache.solr" name="solr-core" rev="${lucene.version}" conf="compile->default" />
+    <dependency org="org.apache.solr" name="solr-solrj" rev="${lucene.version}" conf="compile->default" />
+    <dependency org="commons-logging" name="commons-logging" rev="1.2" conf="test->default" />
+    <dependency org="junit" name="junit" rev="4.11" conf="test->default" />
+    <dependency org="org.slf4j" name="slf4j-api" rev="1.7.6" conf="compile->default"/>
+  </dependencies>
+</ivy-module>
