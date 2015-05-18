@@ -69,7 +69,6 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
       
     assertQ("", req(CommonParams.Q, "brown shoes", CommonParams.QT, "/autofilter" )
               , "//*[@numFound='0']" );
-      
   }
     
   @Test
@@ -143,7 +142,6 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
     assertQ("", req(CommonParams.Q, "Crimson Couch", CommonParams.QT, "/autofilter" )
               , "//*[@numFound='1']"
               , "//doc[./str[@name='id']='2']" );
-        
   }
 
     
@@ -343,16 +341,42 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
   public void testMultipleFieldNames( ) {
     clearIndex();
     assertU(commit());
-    assertU(adoc("id", "1", "first_name", "Tucker",   "last_name", "Thomas", "full_name", "Tucker Thomas"));
-    assertU(adoc("id", "2", "first_name", "Thomas",   "last_name", "Tucker", "full_name", "Thomas Tucker"));
+    assertU(adoc("id", "1", "first_name", "Tucker", "last_name", "Thomas", "full_name", "Tucker Thomas"));
+    assertU(adoc("id", "2", "first_name", "Thomas", "last_name", "Tucker", "full_name", "Thomas Tucker"));
     assertU(commit());
       
-    // should create filter query (first_name:thomas OR last_name_thomas)
+    // should create filter query (first_name:thomas OR last_name:thomas)
     assertQ("", req(CommonParams.Q, "Thomas", CommonParams.QT, "/autofilter" )
               , "//*[@numFound='2']" );
       
+    // uses longer contiguous phrase for full_name - creates fq=full_name:"thomas tucker"
     assertQ("", req(CommonParams.Q, "Thomas Tucker", CommonParams.QT, "/autofilter" )
               , "//*[@numFound='1']"
               , "//doc[./str[@name='id']='2']");
   }
+    
+  @Test
+  public void testMultiValuedField( ) {
+    clearIndex();
+    assertU(commit());
+    assertU( multiValueDocs );
+    assertU(commit());
+      
+    
+    assertQ("", req(CommonParams.Q, "fast stylish", CommonParams.QT, "/autofilter" )
+              , "//*[@numFound='1']" );
+
+    assertQ("", req(CommonParams.Q, "fast and stylish", CommonParams.QT, "/autofilter" )
+              , "//*[@numFound='1']" );
+      
+    assertQ("", req(CommonParams.Q, "fast or stylish", CommonParams.QT, "/autofilter" )
+              , "//*[@numFound='3']" );
+      
+  }
+    
+  private static String multiValueDocs = "<add><doc><field name=\"id\">1</field><field name=\"prop_ss\">fast</field>"
+                                       + "<field name=\"prop_ss\">stylish</field></doc>"
+                                       + "<doc><field name=\"id\">2</field><field name=\"prop_ss\">fast</field>"
+                                       + "<field name=\"prop_ss\">powerful</field></doc>"
+                                       + "<doc><field name=\"id\">3</field><field name=\"prop_ss\">stylish</field></doc></add>";
 }

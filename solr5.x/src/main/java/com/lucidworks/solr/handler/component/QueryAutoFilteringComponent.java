@@ -94,6 +94,9 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
   private HashSet<String> stopwords;
     
   private Integer boostFactor;  // if null, use Filter Query
+    
+  // For multiple terms in the same field, if field is multi-valued = use AND for filter query
+  private boolean useAndForMultiValuedFields = true;
 
   @Override
   public void init( NamedList initArgs ) {
@@ -113,6 +116,11 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       catch ( NumberFormatException nfe ) {
             
       }
+    }
+
+    String useAndForMV = (String)initArgs.get( "useAndForMultiValuedFields" );
+    if (useAndForMV != null) {
+      this.useAndForMultiValuedFields = useAndForMV.equalsIgnoreCase( "true" );
     }
       
     initParams = initArgs;
@@ -242,6 +250,8 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
 
     HashSet<Integer> usedTokens = new HashSet<Integer>( );
     HashMap<String,ArrayList<String>> fieldMap = new HashMap<String,ArrayList<String>>( );
+    HashMap<String,int[]> fieldPositionMap = new HashMap<String,int[]>( );
+      
     String longestPhraseField = null;
     int startToken = 0;
     int lastEndToken = 0;
@@ -281,6 +291,22 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
             fieldMap.put( longestPhraseField, valList );
           }
           valList.add( indexedTerm );
+            
+          // save startToken and lastEndToken so can use for boolean operator context
+          // for multi-value fields -save the min and max of all tokens positions for the field
+          int[] posArray = fieldPositionMap.get( longestPhraseField );
+          if (posArray == null)
+          {
+            posArray = new int[2];
+            posArray[0] = startToken;
+            posArray[1] = lastEndToken;
+            fieldPositionMap.put( longestPhraseField, posArray );
+          }
+          else
+          {
+            posArray[1] = lastEndToken;
+          }
+            
           longestPhraseField = null;
           for (int i = startToken; i <= lastEndToken; i++) {
             Log.info( "adding used token at " + i );
@@ -316,7 +342,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
           Log.info( "setting q = *:*" );
           modParams.set( "q", "*:*" );
           for (String fieldName : fieldMap.keySet() ) {
-            String fq = getFilterQuery( fieldName, fieldMap.get( fieldName ), "" );
+            String fq = getFilterQuery( rb, fieldName, fieldMap.get( fieldName ), fieldPositionMap.get( fieldName ), queryTokens, "" );
             Log.info( "adding filter query: " + fq );
             modParams.add( "fq", fq );
           }
@@ -326,7 +352,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
           StringBuilder boolQ = new StringBuilder( );
           for (String fieldName : fieldMap.keySet() ) {
             if (boolQ.length() > 0) boolQ.append( " AND " );
-            boolQ.append( getFilterQuery( fieldName, fieldMap.get( fieldName ), "" ) );
+            boolQ.append( getFilterQuery( rb, fieldName, fieldMap.get( fieldName ), fieldPositionMap.get( fieldName ), queryTokens, "" ) );
           }
           String q = qbuilder.toString( ) + " (" + boolQ.toString() + ")";
           Log.info( "setting q = '" + q + "'" );
@@ -340,7 +366,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
         bbuilder.append( getPhrase( queryTokens, 0, queryTokens.size() - 1, " " ) );
         for (String fieldName : fieldMap.keySet( ) ) {
           bbuilder.append( " " );
-          bbuilder.append( getFilterQuery( fieldName, fieldMap.get( fieldName ), boostSuffix ) );
+          bbuilder.append( getFilterQuery( rb, fieldName, fieldMap.get( fieldName ), fieldPositionMap.get( fieldName ), queryTokens, boostSuffix ) );
         }
         Log.info( "setting q = '" + bbuilder.toString()  + "'" );
         modParams.set( "q", bbuilder.toString( ) );
@@ -364,28 +390,45 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     return strb.toString( );
   }
     
-  private String getFilterQuery( String fieldName, ArrayList<String> valList, String suffix) {
+  private String getFilterQuery( ResponseBuilder rb, String fieldName, ArrayList<String> valList,
+                                 int[] termPosRange, ArrayList<String> queryTokens, String suffix) {
     if (fieldName.indexOf( "," ) > 0) {
-      return getFilterQuery( fieldName.split( "," ), valList, suffix );
+      return getFilterQuery( rb, fieldName.split( "," ), valList, termPosRange, queryTokens, suffix );
     }
     if (valList.size() == 1) {
       return fieldName + ":" + valList.get( 0 ) + suffix;
     }
     else {
+      SolrIndexSearcher searcher = rb.req.getSearcher();
+      IndexSchema schema = searcher.getSchema();
+      SchemaField field = schema.getField(fieldName);
+      boolean useAnd = field.multiValued() && useAndForMultiValuedFields;
+      // if query has 'or' in it and or is at a position 'within' the values for this field ...
+      if (useAnd) {
+        for (int i = termPosRange[0] + 1; i < termPosRange[1]; i++ ) {
+          String qToken = queryTokens.get( i );
+          if (qToken.equalsIgnoreCase( "or" )) {
+            useAnd = false;
+            break;
+          }
+        }
+      }
+        
       StringBuilder orQ = new StringBuilder( );
       for (String val : valList ) {
-        if (orQ.length() > 0) orQ.append( " OR " );
+        if (orQ.length() > 0) orQ.append( (useAnd ? " AND " : " OR ") );
         orQ.append( val );
       }
       return fieldName + ":(" + orQ.toString() + ")" + suffix;
     }
   }
     
-  private String getFilterQuery( String[] fieldNames, ArrayList<String> valList, String suffix ) {
+  private String getFilterQuery( ResponseBuilder rb, String[] fieldNames, ArrayList<String> valList,
+                                 int[] termPosRange, ArrayList<String> queryTokens, String suffix) {
     StringBuilder filterQBuilder = new StringBuilder( );
     for (int i = 0; i < fieldNames.length; i++) {
       if (i > 0) filterQBuilder.append( " OR " );
-      filterQBuilder.append( getFilterQuery( fieldNames[i], valList, suffix ) );
+      filterQBuilder.append( getFilterQuery( rb, fieldNames[i], valList, termPosRange, queryTokens, suffix ) );
     }
     return "(" + filterQBuilder.toString() + ")";
   }

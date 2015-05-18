@@ -354,4 +354,27 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
               , "//*[@numFound='1']"
               , "//doc[./str[@name='id']='2']");
   }
+    
+  @Test
+  public void testMultiValuedField( ) {
+    clearIndex();
+    assertU(commit());
+    assertU( multiValueDocs );
+    assertU(commit());
+      
+    assertQ("", req(CommonParams.Q, "fast stylish", CommonParams.QT, "/autofilter" )
+              , "//*[@numFound='1']" );
+        
+    assertQ("", req(CommonParams.Q, "fast and stylish", CommonParams.QT, "/autofilter" )
+              , "//*[@numFound='1']" );
+        
+    assertQ("", req(CommonParams.Q, "fast or stylish", CommonParams.QT, "/autofilter" )
+              , "//*[@numFound='3']" );
+  }
+    
+  private static String multiValueDocs = "<add><doc><field name=\"id\">1</field><field name=\"prop_ss\">fast</field>"
+                                       + "<field name=\"prop_ss\">stylish</field></doc>"
+                                       + "<doc><field name=\"id\">2</field><field name=\"prop_ss\">fast</field>"
+                                       + "<field name=\"prop_ss\">powerful</field></doc>"
+                                       + "<doc><field name=\"id\">3</field><field name=\"prop_ss\">stylish</field></doc></add>";
 }
