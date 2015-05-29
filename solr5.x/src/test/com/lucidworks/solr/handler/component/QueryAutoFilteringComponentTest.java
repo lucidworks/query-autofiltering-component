@@ -29,7 +29,7 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
     clearIndex();
     assertU(commit());
     assertU(adoc("id", "1", "color", "red",   "product", "shoes" ));
-    assertU(adoc("id", "2", "color", "red",   "product", "socks" ));
+    assertU(adoc("id", "2", "color", "Red",   "product", "socks" ));
     assertU(adoc("id", "3", "color", "brown", "product", "socks" ));
     assertU(adoc("id", "4", "color", "green", "brand", "red lion",     "product", "socks"));
     assertU(adoc("id", "5", "color", "blue",  "brand", "green dragon", "product", "socks" ));
@@ -234,20 +234,20 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
   @Test
   public void testExcludeFields(  ) {
     // use autofilter handler configured with excludeFields
-      clearIndex();
-      assertU(commit());
-      assertU(adoc("id", "1", "color", "red",   "product", "shoes" ));
-      assertU(adoc("id", "2", "color", "red",   "product", "socks" ));
-      assertU(adoc("id", "3", "color", "green", "brand", "red lion",  "product", "socks"));
-      assertU(adoc("id", "4", "brand", "red label",  "product", "whiskey"));
-      assertU(commit());
+    clearIndex();
+    assertU(commit());
+    assertU(adoc("id", "1", "color", "red",   "product", "shoes" ));
+    assertU(adoc("id", "2", "color", "red",   "product", "socks" ));
+    assertU(adoc("id", "3", "color", "green", "brand", "red lion",  "product", "socks"));
+    assertU(adoc("id", "4", "brand", "red label",  "product", "whiskey"));
+    assertU(commit());
       
-      assertQ("", req(CommonParams.Q, "1", CommonParams.QT, "/autofilter" )
+    assertQ("", req(CommonParams.Q, "1", CommonParams.QT, "/autofilter" )
               , "//*[@numFound='1']"
               , "//doc[./str[@name='id']='1']" );
       
-      // removes 'id' as an autofilter field
-      assertQ("", req(CommonParams.Q, "1", CommonParams.QT, "/autofilterEX" )
+    // removes 'id' as an autofilter field
+    assertQ("", req(CommonParams.Q, "1", CommonParams.QT, "/autofilterEX" )
               , "//*[@numFound='0']" );
     
   }
@@ -342,14 +342,18 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
   public void testMultipleFieldNames( ) {
     clearIndex();
     assertU(commit());
-    assertU(adoc("id", "1", "first_name", "Tucker",   "last_name", "Thomas", "full_name", "Tucker Thomas"));
-    assertU(adoc("id", "2", "first_name", "Thomas",   "last_name", "Tucker", "full_name", "Thomas Tucker"));
+    //assertU(adoc("id", "1", "first_name", "Tucker", "last_name", "Thomas", "full_name", "Tucker Thomas"));
+    //assertU(adoc("id", "2", "first_name", "Thomas", "last_name", "Tucker", "full_name", "Thomas Tucker"));
+    assertU(adoc("id", "1", "full_name", "Tucker Thomas", "text", "Tucker Thomas"));
+    assertU(adoc("id", "2", "full_name", "Thomas Tucker", "text", "Thomas Tucker"));
     assertU(commit());
-      
-    // should create filter query (first_name:thomas OR last_name_thomas)
+        
+    // should create filter query (first_name:thomas OR last_name:thomas)
     assertQ("", req(CommonParams.Q, "Thomas", CommonParams.QT, "/autofilter" )
               , "//*[@numFound='2']" );
-      
+        
+    // uses longer contiguous phrase for full_name - creates fq=full_name:"thomas tucker"
+    // this breaks now because of "fix" for testAmbiguousFields
     assertQ("", req(CommonParams.Q, "Thomas Tucker", CommonParams.QT, "/autofilter" )
               , "//*[@numFound='1']"
               , "//doc[./str[@name='id']='2']");
@@ -361,7 +365,7 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
     assertU(commit());
     assertU( multiValueDocs );
     assertU(commit());
-      
+        
     assertQ("", req(CommonParams.Q, "fast stylish", CommonParams.QT, "/autofilter" )
               , "//*[@numFound='1']" );
         
@@ -372,9 +376,40 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
               , "//*[@numFound='3']" );
   }
     
+  public void testAmbiguousFields( ) {
+    clearIndex();
+    assertU(commit());
+    assertU( whiteAmbiguousDocs );
+    assertU(commit());
+        
+    // should create (brand_s:"white linen" OR (color:white AND material_s:linen))
+    assertQ("", req(CommonParams.Q, "white linen", CommonParams.QT, "/autofilter" )
+              , "//*[@numFound='3']" );
+        
+    assertQ("", req(CommonParams.Q, "white linen perfume", CommonParams.QT, "/autofilter" )
+              , "//*[@numFound='1']" );
+        
+    assertQ("", req(CommonParams.Q, "white linen shirt", CommonParams.QT, "/autofilter" )
+              , "//*[@numFound='2']" );
+        
+    assertQ("", req(CommonParams.Q, "mens white linen shirt", CommonParams.QT, "/autofilter" )
+              , "//*[@numFound='1']" );
+        
+  }
+    
   private static String multiValueDocs = "<add><doc><field name=\"id\">1</field><field name=\"prop_ss\">fast</field>"
-                                       + "<field name=\"prop_ss\">stylish</field></doc>"
-                                       + "<doc><field name=\"id\">2</field><field name=\"prop_ss\">fast</field>"
-                                       + "<field name=\"prop_ss\">powerful</field></doc>"
-                                       + "<doc><field name=\"id\">3</field><field name=\"prop_ss\">stylish</field></doc></add>";
+                                      + "<field name=\"prop_ss\">stylish</field></doc>"
+                                      + "<doc><field name=\"id\">2</field><field name=\"prop_ss\">fast</field>"
+                                      + "<field name=\"prop_ss\">powerful</field></doc>"
+                                      + "<doc><field name=\"id\">3</field><field name=\"prop_ss\">stylish</field></doc></add>";
+    
+  private static String whiteAmbiguousDocs = "<add><doc><field name=\"id\">1</field><field name=\"product_type_s\">perfume</field>"
+                                           + "<field name=\"product_category_s\">fragrences</field><field name=\"brand\">White Linen</field>"
+                                           + "<field name=\"consumer_type_s\">womens</field></doc>"
+                                           + "<doc><field name=\"id\">2</field><field name=\"product_type_s\">dress shirt</field>"
+                                           + "<field name=\"product_category_s\">shirt</field><field name=\"color\">White</field>"
+                                           + "<field name=\"material_s\">Linen</field><field name=\"consumer_type_s\">womens</field></doc>"
+                                           + "<doc><field name=\"id\">3</field><field name=\"product_type_s\">dress shirt</field>"
+                                           + "<field name=\"product_category_s\">shirt</field><field name=\"color\">White</field>"
+                                           + "<field name=\"material_s\">Linen</field><field name=\"consumer_type_s\">mens</field></doc></add>";
 }

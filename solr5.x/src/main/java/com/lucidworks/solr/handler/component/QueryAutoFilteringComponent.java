@@ -290,7 +290,18 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
             valList = new ArrayList<String>( );
             fieldMap.put( longestPhraseField, valList );
           }
-          valList.add( indexedTerm );
+          
+          Log.debug( "indexedTerm: " + indexedTerm );
+          if (indexedTerm.indexOf( "," ) > 0)
+          {
+            String[] indexedTerms = indexedTerm.split( "," );
+            for (int t = 0; t < indexedTerms.length; t++) {
+              valList.add( indexedTerms[t] );
+            }
+          }
+          else {
+            valList.add( indexedTerm );
+          }
             
           // save startToken and lastEndToken so can use for boolean operator context
           // for multi-value fields -save the min and max of all tokens positions for the field
@@ -396,7 +407,25 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       return getFilterQuery( rb, fieldName.split( "," ), valList, termPosRange, queryTokens, suffix );
     }
     if (valList.size() == 1) {
-      return fieldName + ":" + valList.get( 0 ) + suffix;
+      // check if valList[0] is multi-term - if so, check if there is a single term equivalent
+      // if this returns non-null, create an OR query with single term version
+      // example "white linen perfume" vs "white linen shirt"  where "White Linen" is a brand
+      String term = valList.get( 0 );
+        
+      if (term.indexOf( " " ) > 0) {
+        String singleTermQuery = getSingleTermQuery( term );
+        if (singleTermQuery != null) {
+          StringBuilder strb = new StringBuilder( );
+          strb.append( "(" ).append( fieldName ).append( ":" )
+              .append( term ).append( " OR (" ).append( singleTermQuery ).append( "))" ).append( suffix );
+          Log.debug( "returning composite query: " + strb.toString( ) );
+          return strb.toString( );
+        }
+      }
+        
+      String query = fieldName + ":" + term + suffix;
+      Log.debug( "returning single query: " + query );
+      return query;
     }
     else {
       SolrIndexSearcher searcher = rb.req.getSearcher();
@@ -443,9 +472,51 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     return (stemmed.equals( phrase )) ? null : getFieldNameFor( stemmed );
   }
     
+  private String getSingleTermQuery( String multiTermValue ) {
+        
+    String multiTerm = multiTermValue;
+    if (multiTermValue.startsWith( "\"" )) {
+      multiTerm = new String( multiTermValue.substring( 1, multiTermValue.lastIndexOf( "\"" )));
+    }
+    Log.debug( "getSingleTermQuery " + multiTerm + "" );
+        
+    try {
+      StringBuilder strb = new StringBuilder( );
+            
+      String[] terms = multiTerm.split( " " );
+      for (int i = 0; i < terms.length; i++) {
+        if (i > 0) strb.append( " AND " );
+                
+        String fieldName = getFieldNameFor( terms[i].toLowerCase( ) );
+        Log.debug( "fieldName for " + terms[i].toLowerCase( ) + " is " + fieldName );
+        if (fieldName == null) return null;
+                
+        if (fieldName.indexOf( "," ) > 0) {
+          String[] fields = fieldName.split( "," );
+          strb.append( "(" );
+          for (int f = 0; f < fields.length; f++) {
+            if (f > 0) strb.append( " OR " );
+            strb.append( fields[f] ).append( ":" ).append( getMappedFieldName( termMap, terms[i] ) );
+          }
+          strb.append( ")" );
+        }
+        else {
+          strb.append( fieldName ).append( ":" ).append( getMappedFieldName( termMap, terms[i] ) );
+        }
+      }
+            
+      Log.debug( "getSingleTermQuery returns: '" + strb.toString( ) + "'" );
+      return strb.toString( );
+    }
+    catch (IOException ioe ) {
+      return null;
+    }
+  }
+    
   private String getFieldNameFor( String phrase )  throws IOException {
     return ("*".equals( phrase) || "* *".equals( phrase )) ? null : getMappedFieldName( fieldMap, phrase );
   }
+
     
   // TODO: Return comma separated string if more than one
   private String getMappedFieldName( SynonymMap termMap, String phrase ) throws IOException {
