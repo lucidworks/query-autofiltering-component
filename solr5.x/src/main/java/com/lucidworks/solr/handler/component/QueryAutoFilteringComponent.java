@@ -98,6 +98,8 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
   // For multiple terms in the same field, if field is multi-valued = use AND for filter query
   private boolean useAndForMultiValuedFields = true;
 
+  private String fieldDelim = "#";
+    
   @Override
   public void init( NamedList initArgs ) {
     List<String> excludeFields = (List<String>) initArgs.get("excludeFields");
@@ -121,6 +123,11 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     String useAndForMV = (String)initArgs.get( "useAndForMultiValuedFields" );
     if (useAndForMV != null) {
       this.useAndForMultiValuedFields = useAndForMV.equalsIgnoreCase( "true" );
+    }
+      
+    String useFieldDelim = (String)initArgs.get( "fieldDelimiter" );
+    if (useFieldDelim != null) {
+      this.fieldDelim = useFieldDelim;
     }
       
     initParams = initArgs;
@@ -292,9 +299,9 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
           }
           
           Log.debug( "indexedTerm: " + indexedTerm );
-          if (indexedTerm.indexOf( "," ) > 0)
+          if (indexedTerm.indexOf( fieldDelim ) > 0)
           {
-            String[] indexedTerms = indexedTerm.split( "," );
+            String[] indexedTerms = indexedTerm.split( fieldDelim );
             for (int t = 0; t < indexedTerms.length; t++) {
               valList.add( indexedTerms[t] );
             }
@@ -403,8 +410,8 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     
   private String getFilterQuery( ResponseBuilder rb, String fieldName, ArrayList<String> valList,
                                  int[] termPosRange, ArrayList<String> queryTokens, String suffix) {
-    if (fieldName.indexOf( "," ) > 0) {
-      return getFilterQuery( rb, fieldName.split( "," ), valList, termPosRange, queryTokens, suffix );
+    if (fieldName.indexOf( fieldDelim ) > 0) {
+      return getFilterQuery( rb, fieldName.split( fieldDelim ), valList, termPosRange, queryTokens, suffix );
     }
     if (valList.size() == 1) {
       // check if valList[0] is multi-term - if so, check if there is a single term equivalent
@@ -491,8 +498,8 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
         Log.debug( "fieldName for " + terms[i].toLowerCase( ) + " is " + fieldName );
         if (fieldName == null) return null;
                 
-        if (fieldName.indexOf( "," ) > 0) {
-          String[] fields = fieldName.split( "," );
+        if (fieldName.indexOf( fieldDelim ) > 0) {
+          String[] fields = fieldName.split( fieldDelim );
           strb.append( "(" );
           for (int f = 0; f < fields.length; f++) {
             if (f > 0) strb.append( " OR " );
@@ -575,7 +582,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       else {
         StringBuilder fieldBuilder = new StringBuilder( );
         for (String fieldName : mappedFields ) {
-          if (fieldBuilder.length() > 0) fieldBuilder.append( "," );
+          if (fieldBuilder.length() > 0) fieldBuilder.append( fieldDelim );
           fieldBuilder.append( fieldName );
         }
         Log.info( "returning mapped fieldName " + fieldBuilder.toString( ) );
