@@ -25,8 +25,8 @@ import org.apache.lucene.store.ByteArrayDataInput;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.CharsRef;
 import org.apache.lucene.util.CharsRefBuilder;
-import org.apache.lucene.index.LeafReader;
-import org.apache.lucene.uninverting.UninvertingReader;
+import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.index.SortedSetDocValues;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.index.Term;
@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.BufferedReader;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
@@ -69,14 +70,18 @@ import java.nio.charset.StandardCharsets;
  * For SolrCloud, this component requires that the TermsComponent be defined in solrconfig.xml. This is used
  * to get distributed term maps.
  *
- * Compiles with Solr 5.x
+ * Compiles with Solr 4.x
  */
+
+// TO DO: If a field is multiValue and there are multiple matching values in the query, use AND. If there is an 'or' token
+// in the query such as in fast or inexpensive cars, change the internal fq operator to OR
 
 public class QueryAutoFilteringComponent extends QueryComponent implements SolrCoreAware, SolrEventListener {
 	
   private static final Logger Log = LoggerFactory.getLogger( QueryAutoFilteringComponent.class );
     
   public static final String MINIMUM_TOKENS = "mt";
+  public static final String BOOST_PARAM    = "afb";
     
   private SynonymMap fieldMap;   // Map of search terms to fieldName
   private SynonymMap synonyms;   // synonyms from synonyms.txt
@@ -97,9 +102,11 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     
   // For multiple terms in the same field, if field is multi-valued = use AND for filter query
   private boolean useAndForMultiValuedFields = true;
-
-  private String fieldDelim = "#";
     
+  private String fieldDelim = "|";
+    
+  private String fieldSplitExpr = "\\|";
+
   @Override
   public void init( NamedList initArgs ) {
     List<String> excludeFields = (List<String>) initArgs.get("excludeFields");
@@ -119,7 +126,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
             
       }
     }
-
+      
     String useAndForMV = (String)initArgs.get( "useAndForMultiValuedFields" );
     if (useAndForMV != null) {
       this.useAndForMultiValuedFields = useAndForMV.equalsIgnoreCase( "true" );
@@ -128,6 +135,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     String useFieldDelim = (String)initArgs.get( "fieldDelimiter" );
     if (useFieldDelim != null) {
       this.fieldDelim = useFieldDelim;
+      this.fieldSplitExpr = useFieldDelim;
     }
       
     initParams = initArgs;
@@ -142,8 +150,8 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       if (synonymsFile != null) {
         Analyzer analyzer = new Analyzer() {
         @Override
-          protected TokenStreamComponents createComponents(String fieldName) {
-            Tokenizer tokenizer = new KeywordTokenizer();
+          protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
+            Tokenizer tokenizer = new KeywordTokenizer( reader );
             return new TokenStreamComponents(tokenizer, tokenizer );
           }
         };
@@ -284,6 +292,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
         String phrase = getPhrase( queryTokens, startToken, lastEndToken );
         Log.debug( "get Indexed Term for " + phrase );
         String indexedTerm = getMappedFieldName( termMap, phrase );
+
         if (indexedTerm == null) {
           indexedTerm = getMappedFieldName( termMap, getStemmed( phrase ));
         }
@@ -297,12 +306,13 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
             valList = new ArrayList<String>( );
             fieldMap.put( longestPhraseField, valList );
           }
-          
+            
           Log.debug( "indexedTerm: " + indexedTerm );
           if (indexedTerm.indexOf( fieldDelim ) > 0)
           {
-            String[] indexedTerms = indexedTerm.split( fieldDelim );
+            String[] indexedTerms = indexedTerm.split( fieldSplitExpr );
             for (int t = 0; t < indexedTerms.length; t++) {
+                System.out.println( "adding single term " + indexedTerms[t] );
               valList.add( indexedTerms[t] );
             }
           }
@@ -339,7 +349,8 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     }
       
     if (usedTokens.size( ) > 0) {
-        
+      String useBoost = modParams.get( BOOST_PARAM );
+      Integer boostFactor = (useBoost != null) ? new Integer( useBoost ) : this.boostFactor;
       if (boostFactor == null) {
         StringBuilder qbuilder = new StringBuilder( );
         if (usedTokens.size( ) < queryTokens.size( ) ) {
@@ -410,15 +421,16 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     
   private String getFilterQuery( ResponseBuilder rb, String fieldName, ArrayList<String> valList,
                                  int[] termPosRange, ArrayList<String> queryTokens, String suffix) {
+      
     if (fieldName.indexOf( fieldDelim ) > 0) {
-      return getFilterQuery( rb, fieldName.split( fieldDelim ), valList, termPosRange, queryTokens, suffix );
+      return getFilterQuery( rb, fieldName.split( fieldSplitExpr ), valList, termPosRange, queryTokens, suffix );
     }
     if (valList.size() == 1) {
       // check if valList[0] is multi-term - if so, check if there is a single term equivalent
       // if this returns non-null, create an OR query with single term version
       // example "white linen perfume" vs "white linen shirt"  where "White Linen" is a brand
       String term = valList.get( 0 );
-        
+
       if (term.indexOf( " " ) > 0) {
         String singleTermQuery = getSingleTermQuery( term );
         if (singleTermQuery != null) {
@@ -429,15 +441,17 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
           return strb.toString( );
         }
       }
-        
+
       String query = fieldName + ":" + term + suffix;
       Log.debug( "returning single query: " + query );
       return query;
     }
     else {
+      // Check if it is a MultiValued Field - if so, use AND internally
       SolrIndexSearcher searcher = rb.req.getSearcher();
       IndexSchema schema = searcher.getSchema();
       SchemaField field = schema.getField(fieldName);
+        
       boolean useAnd = field.multiValued() && useAndForMultiValuedFields;
       // if query has 'or' in it and or is at a position 'within' the values for this field ...
       if (useAnd) {
@@ -455,12 +469,15 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
         if (orQ.length() > 0) orQ.append( (useAnd ? " AND " : " OR ") );
         orQ.append( val );
       }
-      return fieldName + ":(" + orQ.toString() + ")" + suffix;
+        
+      String fq = fieldName + ":(" + orQ.toString() + ")" + suffix;
+      Log.debug( "fq = " + fq );
+      return fq;
     }
   }
     
   private String getFilterQuery( ResponseBuilder rb, String[] fieldNames, ArrayList<String> valList,
-                                 int[] termPosRange, ArrayList<String> queryTokens, String suffix) {
+                                 int[] termPosRange, ArrayList<String> queryTokens, String suffix ) {
     StringBuilder filterQBuilder = new StringBuilder( );
     for (int i = 0; i < fieldNames.length; i++) {
       if (i > 0) filterQBuilder.append( " OR " );
@@ -472,6 +489,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
   private String getFieldNameFor( ArrayList<String> queryTokens, int startToken, int endToken ) throws IOException {
     String phrase = getPhrase( queryTokens, startToken, endToken );
     String fieldName = getFieldNameFor( phrase );
+    Log.debug( "field for " + phrase + " is " + fieldName );
     if (fieldName != null) return fieldName;
       
     String stemmed = getStemmed( phrase );
@@ -480,39 +498,39 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
   }
     
   private String getSingleTermQuery( String multiTermValue ) {
-        
+
     String multiTerm = multiTermValue;
     if (multiTermValue.startsWith( "\"" )) {
       multiTerm = new String( multiTermValue.substring( 1, multiTermValue.lastIndexOf( "\"" )));
     }
     Log.debug( "getSingleTermQuery " + multiTerm + "" );
-        
+
     try {
       StringBuilder strb = new StringBuilder( );
-            
+      
       String[] terms = multiTerm.split( " " );
       for (int i = 0; i < terms.length; i++) {
         if (i > 0) strb.append( " AND " );
-                
+        
         String fieldName = getFieldNameFor( terms[i].toLowerCase( ) );
-        Log.debug( "fieldName for " + terms[i].toLowerCase( ) + " is " + fieldName );
+        Log.info( "fieldName for " + terms[i].toLowerCase( ) + " is " + fieldName );
         if (fieldName == null) return null;
-                
+        
         if (fieldName.indexOf( fieldDelim ) > 0) {
-          String[] fields = fieldName.split( fieldDelim );
+          String[] fields = fieldName.split( fieldSplitExpr );
           strb.append( "(" );
           for (int f = 0; f < fields.length; f++) {
             if (f > 0) strb.append( " OR " );
-            strb.append( fields[f] ).append( ":" ).append( getMappedFieldName( termMap, terms[i] ) );
+            strb.append( fields[f] ).append( ":" ).append( getMappedFieldName( termMap, terms[i].toLowerCase( ) ) );
           }
           strb.append( ")" );
         }
         else {
-          strb.append( fieldName ).append( ":" ).append( getMappedFieldName( termMap, terms[i] ) );
+          strb.append( fieldName ).append( ":" ).append( getMappedFieldName( termMap, terms[i].toLowerCase( ) ) );
         }
       }
-            
-      Log.debug( "getSingleTermQuery returns: '" + strb.toString( ) + "'" );
+
+      Log.info( "getSingleTermQuery returns: '" + strb.toString( ) + "'" );
       return strb.toString( );
     }
     catch (IOException ioe ) {
@@ -523,7 +541,6 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
   private String getFieldNameFor( String phrase )  throws IOException {
     return ("*".equals( phrase) || "* *".equals( phrase )) ? null : getMappedFieldName( fieldMap, phrase );
   }
-
     
   // TODO: Return comma separated string if more than one
   private String getMappedFieldName( SynonymMap termMap, String phrase ) throws IOException {
@@ -603,18 +620,12 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     SynonymMap.Builder fieldBuilder = new SynonymMap.Builder( true );
     SynonymMap.Builder termBuilder = new SynonymMap.Builder( true );
       
-    HashMap<String,UninvertingReader.Type> fieldTypeMap = new HashMap<String,UninvertingReader.Type>( );
-      
     ArrayList<String> searchFields = getStringFields( searcher );
-    for (String searchField : searchFields ) {
-      fieldTypeMap.put( searchField, UninvertingReader.Type.SORTED_SET_BINARY);
-    }
-    UninvertingReader unvRead = new UninvertingReader( searcher.getLeafReader( ), fieldTypeMap );
   
     for (String searchField : searchFields ) {
       Log.debug( "adding searchField " + searchField );
       CharsRef fieldChars = new CharsRef( searchField );
-      SortedSetDocValues sdv = unvRead.getSortedSetDocValues( searchField );
+      SortedSetDocValues sdv = FieldCache.DEFAULT.getDocTermOrds( searcher.getAtomicReader( ), searchField );
       if (sdv == null) continue;
       Log.debug( "got SortedSetDocValues for " + searchField );
       TermsEnum te = sdv.termsEnum();
@@ -727,7 +738,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
         
       params.set( CommonParams.DISTRIB, "false" );
       params.set( ShardParams.IS_SHARD, true );
-      params.set( ShardParams.SHARDS_PURPOSE, sreq.purpose );
+      params.set( "shards.purpose", sreq.purpose );
       params.set( CommonParams.QT, termsHandler );
       params.set( TermsParams.TERMS, "true" );
         
