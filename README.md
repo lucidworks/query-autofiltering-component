@@ -61,7 +61,7 @@ To use autofiltering boost query mode "on demand" add an &amp;afb parameter to t
 
 To show the query autofiltering component in action, I created a sample data set for a hypothetical department store. The input data contains a number of fields, product_type, product_category, color, material, brand, style, consumer_type and so on. 
 
-To build the demo, download Solr 5 (or Solr 4 if that is what your production app is on), put the schema.xml and solrconfig.xml in the server/solr/collection1/conf directory for Solr 4 or server/solr/configsets/basic_configs/conf for Solr 5 - or better yet, clone basic_configs/conf and create a new configset called query_autofilter_config_set and replace schema.xml and solrconfig.xml. 
+To build the demo, download Solr 5 (or Solr 4 if that is what your production app is on), put the schema.xml and solrconfig.xml in the solr/collection1/conf directory for Solr 4 or server/solr/configsets/basic_configs/conf for Solr 5 - or better yet, clone basic_configs/conf and create a new configset called query_autofilter_config_set and replace schema.xml and solrconfig.xml. 
 
 Put the jar file generated from running "ant dist" - or simply "ant" (it will be in the dist/ folder and called query-autofiltering-component-1.0.jar) into solr-webapp/webapp/WEB-INF/lib for Solr 4 or server/solr-webapp/webapp/WEB-INF/lib for Solr 5.
 
