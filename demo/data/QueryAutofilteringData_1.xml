@@ -1,0 +1,1519 @@
+<add>
+  <doc>
+    <field name="id">1</field>
+    <field name="product_type">dress shoe</field>
+    <field name="product_category">shoe</field>
+    <field name="color">black</field>
+    <field name="material">leather</field>
+    <field name="brand">Buster Brown</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">2</field>
+    <field name="product_type">dress shoe</field>
+    <field name="product_category">shoe</field>
+    <field name="color">black</field>
+    <field name="material">leather</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">3</field>
+    <field name="product_type">running shoe</field>
+    <field name="product_category">shoe</field>
+    <field name="color">black</field>
+    <field name="brand">Nike</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">4</field>
+    <field name="product_type">flip flops</field>
+    <field name="product_category">shoe</field>
+    <field name="color">black</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">5</field>
+    <field name="product_type">dress shoe</field>
+    <field name="product_category">shoe</field>
+    <field name="color">brown</field>
+    <field name="material">suede</field>
+    <field name="brand">Buster Brown</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">6</field>
+    <field name="product_type">work boot</field>
+    <field name="product_category">shoe</field>
+    <field name="color">brown</field>
+    <field name="material">leather</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">7</field>
+    <field name="product_type">evening dress</field>
+    <field name="product_category">dress</field>
+    <field name="color">black</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">8</field>
+    <field name="product_type">running shoe</field>
+    <field name="product_category">shoe</field>
+    <field name="color">black</field>
+    <field name="brand">Addidas</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">9</field>
+    <field name="product_type">running shoe</field>
+    <field name="product_category">shoe</field>
+    <field name="color">white</field>
+    <field name="brand">Addidas</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">10</field>
+    <field name="product_type">running shoe</field>
+    <field name="product_category">shoe</field>
+    <field name="color">white</field>
+    <field name="brand">Nike</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">11</field>
+    <field name="product_type">dress</field>
+    <field name="product_category">dress</field>
+    <field name="color">black</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">12</field>
+    <field name="product_type">pants suit</field>
+    <field name="product_category">suit</field>
+    <field name="color">beige</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">13</field>
+    <field name="product_type">suit pants</field>
+    <field name="product_category">pants</field>
+    <field name="color">grey</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">14</field>
+    <field name="product_type">sneakers</field>
+    <field name="product_category">shoes</field>
+    <field name="color">red</field>
+    <field name="brand">Converse</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">15</field>
+    <field name="product_type">sneaker socks</field>
+    <field name="product_category">socks</field>
+    <field name="color">white</field>
+    <field name="brand">Hanes</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">16</field>
+    <field name="product_type">shorts</field>
+    <field name="product_category">pants</field>
+    <field name="color">white</field>
+    <field name="brand">Vinyard Vines</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">17</field>
+    <field name="product_type">boxer shorts</field>
+    <field name="product_category">underwear</field>
+    <field name="color">white</field>
+    <field name="brand">Fruit of the Loom</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">18</field>
+    <field name="product_type">shorts</field>
+    <field name="product_category">pants</field>
+    <field name="color">blue</field>
+    <field name="brand">Old Navy</field>
+    <field name="material">denim</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">19</field>
+    <field name="product_type">beach shorts</field>
+    <field name="product_category">pants</field>
+    <field name="color">patterned</field>
+    <field name="brand">Old Navy</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">20</field>
+    <field name="product_type">shorts</field>
+    <field name="product_category">pants</field>
+    <field name="color">blue</field>
+    <field name="brand">Old Navy</field>
+    <field name="style">cut-off</field>
+    <field name="material">denim</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">21</field>
+    <field name="product_type">shorts</field>
+    <field name="product_category">pants</field>
+    <field name="style">cut-off</field>
+    <field name="style">pre-washed</field>
+    <field name="color">blue</field>
+    <field name="brand">Levis</field>
+    <field name="material">denim</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">22</field>
+    <field name="product_type">jeans</field>
+    <field name="product_category">pants</field>
+    <field name="color">blue</field>
+    <field name="style">straight leg</field>
+    <field name="style">relaxed fit</field>
+    <field name="style">pre-washed</field>
+    <field name="brand">Levis</field>
+    <field name="material">denim</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">23</field>
+    <field name="product_type">jeans</field>
+    <field name="product_category">pants</field>
+    <field name="color">fawn</field>
+    <field name="brand">Wrangler</field>
+    <field name="material">twill</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">24</field>
+    <field name="product_type">dress socks</field>
+    <field name="product_category">socks</field>
+    <field name="color">gray</field>
+    <field name="brand">Tie Bar</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">25</field>
+    <field name="product_type">tie</field>
+    <field name="product_category">tie</field>
+    <field name="color">gray</field>
+    <field name="brand">Flip My Tie</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">26</field>
+    <field name="product_type">polo shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="color">green</field>
+    <field name="brand">Izod Lacoste</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">27</field>
+    <field name="product_type">sneakers</field>
+    <field name="product_category">shoes</field>
+    <field name="color">black</field>
+    <field name="brand">Polo Ralph Lauren</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">28</field>
+    <field name="product_type">espadrille</field>
+    <field name="product_category">shoes</field>
+    <field name="color">indigo</field>
+    <field name="material">cotton canvas</field>
+    <field name="brand">Polo Ralph Lauren</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">29</field>
+    <field name="product_type">athletic socks</field>
+    <field name="product_category">socks</field>
+    <field name="brand">Red Lion</field>
+    <field name="color">Red/White</field>
+    <field name="consumer_type">boys</field>
+  </doc>
+  <doc>
+    <field name="id">30</field>
+    <field name="product_type">weather boots</field>
+    <field name="product_category">shoes</field>
+    <field name="brand">Totes</field>
+    <field name="color">black</field>
+    <field name="consumer_type">mens</field>
+  </doc>  
+  <doc>
+    <field name="id">31</field>
+    <field name="product_type">tote bag</field>
+    <field name="product_category">accessories</field>
+    <field name="brand">Rosetti</field>
+    <field name="material">leather</field>
+    <field name="color">green</field>
+    <field name="consumer_type">womens</field>
+  </doc>   
+  <doc>
+    <field name="id">32</field>
+    <field name="product_type">umbrella</field>
+    <field name="product_category">accessories</field>
+    <field name="brand">Totes</field>
+    <field name="color">black</field>
+    <field name="consumer_type">mens</field>
+  </doc> 
+  <doc>
+    <field name="id">33</field>
+    <field name="product_type">patio umbrella</field>
+    <field name="product_category">patio furniture</field>
+    <field name="color">orange</field>
+    <field name="brand">Hampton Bay</field>
+  </doc>
+  <doc>
+    <field name="id">34</field>
+    <field name="product_type">beach umbrella</field>
+    <field name="product_category">beach accessories</field>
+    <field name="color">blue</field>
+    <field name="brand">Nautica</field>
+  </doc>
+  <doc>
+    <field name="id">35</field>
+    <field name="product_type">beach chair</field>
+    <field name="product_category">beach accessories</field>
+    <field name="color">red</field>
+    <field name="brand">Nautica</field>
+  </doc>
+  <doc>
+    <field name="id">35</field>
+    <field name="product_type">lawn chair</field>
+    <field name="product_category">patio furniture</field>
+    <field name="style">web</field>
+    <field name="color">blue</field>
+    <field name="brand">Rio Brands</field>
+  </doc>
+  <doc>
+    <field name="id">36</field>
+    <field name="product_type">lawn chair</field>
+    <field name="product_category">patio furniture</field>
+    <field name="style">Adirondack</field>
+    <field name="color">blue</field>
+    <field name="material">moulded resin</field>
+    <field name="brand">Adams</field>
+  </doc>
+  <doc>
+    <field name="id">37</field>
+    <field name="product_type">hand bag</field>
+    <field name="product_category">accessories</field>
+    <field name="color">brown</field>
+    <field name="material">leather</field>
+    <field name="brand">Gucci</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">38</field>
+    <field name="product_type">work boots</field>
+    <field name="product_category">shoes</field>
+    <field name="color">black</field>
+    <field name="material">leather</field>
+    <field name="brand">Red Wing</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">39</field>
+    <field name="product_type">shoes</field>
+    <field name="product_category">shoes</field>
+    <field name="color">tan</field>
+    <field name="material">leather</field>
+    <field name="brand">White Mountain</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">40</field>
+    <field name="product_type">casual shoes</field>
+    <field name="product_category">shoes</field>
+    <field name="color">nude</field>
+    <field name="material">leather</field>
+    <field name="brand">White Mountain</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">40</field>
+    <field name="product_type">flats</field>
+    <field name="product_category">shoes</field>
+    <field name="color">back</field>
+    <field name="material">quilted</field>
+    <field name="brand">White Mountain</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">41</field>
+    <field name="product_type">walking shoes</field>
+    <field name="product_category">shoes</field>
+    <field name="color">white</field>
+    <field name="material">leather</field>
+    <field name="brand">New Balance</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">42</field>
+    <field name="product_type">walking shoes</field>
+    <field name="product_category">shoes</field>
+    <field name="color">white</field>
+    <field name="material">leather/mesh</field>
+    <field name="brand">New Balance</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">43</field>
+    <field name="product_type">training shoes</field>
+    <field name="product_category">shoes</field>
+    <field name="color">white</field>
+    <field name="material">air mesh/synthetic</field>
+    <field name="brand">Scott Running</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">44</field>
+    <field name="product_type">running shoes</field>
+    <field name="product_category">shoes</field>
+    <field name="color">red</field>
+    <field name="material">air mesh/synthetic</field>
+    <field name="brand">Nike</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">45</field>
+    <field name="product_type">running shorts</field>
+    <field name="product_category">pants</field>
+    <field name="color">pink</field>
+    <field name="material">polyester</field>
+    <field name="brand">Nike</field>
+    <field name="consumer_type">girls</field>
+  </doc>
+  <doc>
+    <field name="id">46</field>
+    <field name="product_type">running shorts</field>
+    <field name="product_category">pants</field>
+    <field name="color">black</field>
+    <field name="material">polyester</field>
+    <field name="brand">Under Armour</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">47</field>
+    <field name="product_type">running shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="color">red</field>
+    <field name="material">knit mesh</field>
+    <field name="brand">Under Armour</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">48</field>
+    <field name="product_type">running shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">tank top</field>
+    <field name="color">blue</field>
+    <field name="material">knit mesh</field>
+    <field name="brand">Under Armour</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">49</field>
+    <field name="product_type">tee shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="color">black</field>
+    <field name="style">tank top</field>
+    <field name="material">cotton</field>
+    <field name="brand">Jack Adams</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">50</field>
+    <field name="product_type">dress shoes</field>
+    <field name="product_category">shoes</field>
+    <field name="style">Oxford</field>
+    <field name="style">Wing-tip</field>
+    <field name="color">brown</field>
+    <field name="material">leather</field>
+    <field name="brand">Stacey Adams</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">51</field>
+    <field name="product_type">dress shoes</field>
+    <field name="product_category">shoes</field>
+    <field name="color">black</field>
+    <field name="style">Oxford</field>
+    <field name="style">Wing-tip</field>
+    <field name="material">leather</field>
+    <field name="brand">Stacey Adams</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">52</field>
+    <field name="product_type">dress shoes</field>
+    <field name="product_category">shoes</field>
+    <field name="color">blue</field>
+    <field name="style">Oxford</field>
+    <field name="style">Wing-tip</field>
+    <field name="material">suede</field>
+    <field name="brand">Stacey Adams</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">53</field>
+    <field name="product_type">dress boots</field>
+    <field name="product_category">shoes</field>
+    <field name="color">black</field>
+    <field name="material">leather</field>
+    <field name="brand">Stacey Adams</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">54</field>
+    <field name="product_type">polo shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="color">navy blue</field>
+    <field name="material">cotton</field>
+    <field name="brand">Samuel Adams</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">55</field>
+    <field name="product_type">tee shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="color">navy blue</field>
+    <field name="material">cotton</field>
+    <field name="brand">Samuel Adams</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">56</field>
+    <field name="product_type">bar table</field>
+    <field name="product_category">furniture</field>
+    <field name="color">charcoal</field>
+    <field name="material">wood</field>
+    <field name="brand">Jack Daniels</field>
+  </doc>
+  <doc>
+    <field name="id">57</field>
+    <field name="product_type">polo shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="color">black</field>
+    <field name="material">cotton</field>
+    <field name="brand">Jack Daniels</field>
+  </doc>
+  <doc>
+    <field name="id">58</field>
+    <field name="product_type">shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">short-sleeve</field>
+    <field name="style">button down</field>
+    <field name="color">blue</field>
+    <field name="material">cotton</field>
+    <field name="brand">Ralph Lauren</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">59</field>
+    <field name="product_type">shirt dress</field>
+    <field name="product_category">dress</field>
+    <field name="color">black</field>
+    <field name="material">cotton</field>
+    <field name="brand">Ralph Lauren</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">60</field>
+    <field name="product_type">shirt dress</field>
+    <field name="product_category">dress</field>
+    <field name="color">green</field>
+    <field name="material">cotton</field>
+    <field name="brand">Ralph Lauren</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">61</field>
+    <field name="product_type">dress shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="color">white</field>
+    <field name="material">cotton</field>
+    <field name="brand">Michael Kors</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">62</field>
+    <field name="product_type">dress shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="color">yellow</field>
+    <field name="material">cotton</field>
+    <field name="brand">Lands' End</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">63</field>
+    <field name="product_type">pants suit</field>
+    <field name="product_category">suit</field>
+    <field name="color">navy blue</field>
+    <field name="material">polyester</field>
+    <field name="brand">Venus</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">64</field>
+    <field name="product_type">bootcut pants</field>
+    <field name="product_category">pants</field>
+    <field name="color">navy blue</field>
+    <field name="material">polyester</field>
+    <field name="brand">Drew Collection</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">65</field>
+    <field name="product_type">ankle pants</field>
+    <field name="product_category">pants</field>
+    <field name="color">khaki</field>
+    <field name="material">cotton/spandex</field>
+    <field name="brand">The Limited</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">66</field>
+    <field name="product_type">ankle boots</field>
+    <field name="product_category">shoes</field>
+    <field name="color">brown</field>
+    <field name="material">leather</field>
+    <field name="brand">Sam Edelman</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">66</field>
+    <field name="product_type">ankle boots</field>
+    <field name="product_category">shoes</field>
+    <field name="color">black</field>
+    <field name="material">leather</field>
+    <field name="brand">Sam Edelman</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">67</field>
+    <field name="product_type">ankle socks</field>
+    <field name="product_category">socks</field>
+    <field name="color">black</field>
+    <field name="material">cotton</field>
+    <field name="brand">Converse</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">68</field>
+    <field name="product_type">ankle socks</field>
+    <field name="product_category">socks</field>
+    <field name="color">white</field>
+    <field name="material">cotton</field>
+    <field name="brand">Converse</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">69</field>
+    <field name="product_type">ankle socks</field>
+    <field name="product_category">socks</field>
+    <field name="color">denim</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">70</field>
+    <field name="product_type">boot socks</field>
+    <field name="product_category">socks</field>
+    <field name="color">dark khaki</field>
+    <field name="material">cotton</field>
+    <field name="brand">LL Bean</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">71</field>
+    <field name="product_type">ankle bracelet</field>
+    <field name="product_category">jewelry</field>
+    <field name="color">gold</field>
+    <field name="material">gold</field>
+    <field name="brand">Zales</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">72</field>
+    <field name="product_type">dress socks</field>
+    <field name="product_category">socks</field>
+    <field name="color">black</field>
+    <field name="material">polyester</field>
+    <field name="brand">Gold Toe</field>
+    <field name="consumer_type">mens</field>
+  </doc> 
+  <doc>
+    <field name="id">73</field>
+    <field name="product_type">toe ring</field>
+    <field name="product_category">jewelry</field>
+    <field name="color">silver</field>
+    <field name="material">sterling silver</field>
+    <field name="brand">K-Mart</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">74</field>
+    <field name="product_type">ankle socks</field>
+    <field name="product_category">socks</field>
+    <field name="material">polyester</field>
+    <field name="brand">Gold Toe</field>
+    <field name="color">grey</field>
+    <field name="consumer_type">mens</field>
+  </doc> 
+  <doc>
+    <field name="id">75</field>
+    <field name="product_type">crew socks</field>
+    <field name="product_category">socks</field>
+    <field name="material">cotton</field>
+    <field name="color">khaki</field>
+    <field name="brand">Gold Toe</field>
+    <field name="consumer_type">mens</field>
+  </doc> 
+  <doc>
+    <field name="id">76</field>
+    <field name="product_type">Khaki pants</field>
+    <field name="product_category">pants</field>
+    <field name="material">cotton</field>
+    <field name="color">blue</field>
+    <field name="brand">Dockers</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">77</field>
+    <field name="product_type">toe socks</field>
+    <field name="product_category">socks</field>
+    <field name="material">wool</field>
+    <field name="colors">blue</field>
+    <field name="colors">white</field>
+    <field name="brand">Printed Clouds</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">78</field>
+    <field name="product_type">toe socks</field>
+    <field name="product_category">socks</field>
+    <field name="material">wool</field>
+    <field name="color">black</field>
+    <field name="brand">B.ella</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">79</field>
+    <field name="product_type">knee socks</field>
+    <field name="product_category">socks</field>
+    <field name="material">wool</field>
+    <field name="style">Argyle</field>
+    <field name="color">black</field>
+    <field name="brand">Sockwell</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">80</field>
+    <field name="product_type">toe socks</field>
+    <field name="product_category">socks</field>
+    <field name="material">wool</field>
+    <field name="style">Argyle</field>
+    <field name="style">knee-high</field>
+    <field name="colors">black</field>
+    <field name="colors">grey</field>
+    <field name="brand">Tabbisocks</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">81</field>
+    <field name="product_type">dress shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">Oxford</field>
+    <field name="brand">Stafford</field>
+    <field name="color">burgundy</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">82</field>
+    <field name="product_type">dress shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">Oxford</field>
+    <field name="brand">Stafford</field>
+    <field name="color">taupe</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">83</field>
+    <field name="product_type">polo shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="brand">Brooks Brothers Red Fleece</field>
+    <field name="color">green</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">84</field>
+    <field name="product_type">stripe shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="brand">Brooks Brothers Red Fleece</field>
+    <field name="color">blue</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">85</field>
+    <field name="product_type">dress shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">sport</field>
+    <field name="style">short-sleeve</field>
+    <field name="style">button-down</field>
+    <field name="brand">Brooks Brothers Red Fleece</field>
+    <field name="color">indigo</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">85</field>
+    <field name="product_type">dress shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="brand">Brooks Brothers</field>
+    <field name="style">long-sleeve</field>
+    <field name="color">pink</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">86</field>
+    <field name="product_type">dress shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">floral print</field>
+    <field name="brand">Brooks Brothers Black Fleece</field>
+    <field name="color">white</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">87</field>
+    <field name="product_type">fleece pullover</field>
+    <field name="product_category">shirt</field>
+    <field name="style">pullover</field>
+    <field name="brand">Marmot</field>
+    <field name="color">green</field>
+    <field name="material">Fleece</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">88</field>
+    <field name="product_type">fleece lined shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">button-down</field>
+    <field name="brand">LL Bean</field>
+    <field name="color">tartan plaid</field>
+    <field name="material">acrylic/Fleece</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">89</field>
+    <field name="product_type">fleece lined shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">button-down</field>
+    <field name="brand">Guide Gear</field>
+    <field name="color">blue</field>
+    <field name="material">denim/Fleece</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">90</field>
+    <field name="product_type">sweatshirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">crew neck</field>
+    <field name="brand">Rutland</field>
+    <field name="color">grey/black</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">boys</field>
+  </doc>
+  <doc>
+    <field name="id">91</field>
+    <field name="product_type">fleece top</field>
+    <field name="product_category">shirt</field>
+    <field name="style">crew neck</field>
+    <field name="brand">Blair</field>
+    <field name="color">green</field>
+    <field name="material">fleece</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">92</field>
+    <field name="product_type">fleece top</field>
+    <field name="product_category">shirt</field>
+    <field name="style">zipper top</field>
+    <field name="brand">Blair</field>
+    <field name="color">pewter</field>
+    <field name="material">fleece</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+ <doc>
+    <field name="id">93</field>
+    <field name="product_type">fleece top</field>
+    <field name="product_category">shirt</field>
+    <field name="style">shawl top</field>
+    <field name="brand">Blair</field>
+    <field name="color">navy</field>
+    <field name="material">fleece</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">94</field>
+    <field name="product_type">sweatshirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">crew-neck</field>
+    <field name="brand">Old Navy</field>
+    <field name="color">grey</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">95</field>
+    <field name="product_type">sweatshirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">V neck</field>
+    <field name="style">short-sleeve</field>
+    <field name="brand">J Crew Factory</field>
+    <field name="color">grey</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">96</field>
+    <field name="product_type">sweater-tee</field>
+    <field name="product_category">shirt</field>
+    <field name="style">V-neck</field>
+    <field name="style">short-sleeve</field>
+    <field name="brand">J Crew Factory</field>
+    <field name="color">green</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">97</field>
+    <field name="product_type">umbrella</field>
+    <field name="product_category">accessories</field>
+    <field name="brand">J Crew Factory</field>
+    <field name="color">blue orange</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">98</field>
+    <field name="product_type">sweatshirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">crew neck</field>
+    <field name="style">stripes</field>
+    <field name="brand">J Crew Factory</field>
+    <field name="colors">white</field>
+    <field name="colors">navy</field>
+    <field name="material">fleece</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">99</field>
+    <field name="product_type">shorts</field>
+    <field name="product_category">pants</field>
+    <field name="brand">J Crew Factory</field>
+    <field name="color">quartz</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">100</field>
+    <field name="product_type">boxer shorts</field>
+    <field name="product_category">underwear</field>
+    <field name="style">stripes</field>
+    <field name="brand">J Crew Factory</field>
+    <field name="colors">white</field>
+    <field name="colors">navy</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">101</field>
+    <field name="product_type">running tee-shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">long-sleeve</field>
+    <field name="brand">Champion</field>
+    <field name="color">black</field>
+    <field name="material">polyester</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">102</field>
+    <field name="product_type">running tee</field>
+    <field name="product_category">shirt</field>
+    <field name="style">long-sleeve</field>
+    <field name="brand">Champion</field>
+    <field name="color">quartz grey</field>
+    <field name="material">polyester</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">103</field>
+    <field name="product_type">pillbox hat</field>
+    <field name="product_category">hat</field>
+    <field name="style">black feathers</field>
+    <field name="brand">Sean Barrett</field>
+    <field name="color">blue</field>
+    <field name="material">silk</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">104</field>
+    <field name="product_type">pillbox hat</field>
+    <field name="product_category">hat</field>
+    <field name="style">flower black pearl</field>
+    <field name="brand">Shi Xaio Ying</field>
+    <field name="color">red</field>
+    <field name="material">wool felt</field>
+    <field name="made_in">China</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">105</field>
+    <field name="product_type">tee shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">crew-neck</field>
+    <field name="brand">Fruit of the Loom</field>
+    <field name="color">white</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">105</field>
+    <field name="product_type">tee shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">V-neck</field>
+    <field name="brand">Fruit of the Loom</field>
+    <field name="color">white</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">106</field>
+    <field name="product_type">t-shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">V-neck</field>
+    <field name="brand">White Lion</field>
+    <field name="color">black</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">107</field>
+    <field name="product_type">dress</field>
+    <field name="product_category">dress</field>
+    <field name="style">Francesca</field>
+    <field name="brand">Black Swan</field>
+    <field name="color">Aqua Blue</field>
+    <field name="material">lace</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">108</field>
+    <field name="product_type">print dress</field>
+    <field name="product_category">dress</field>
+    <field name="style">Floral Print</field>
+    <field name="style">Melrose</field>
+    <field name="brand">Black Swan</field>
+    <field name="color">Red</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">109</field>
+    <field name="product_type">T-Shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="style">Black Panther Shadow</field>
+    <field name="brand">Marvel</field>
+    <field name="color">Red</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">adult</field>
+  </doc>
+  <doc>
+    <field name="id">110</field>
+    <field name="product_type">dress shoes</field>
+    <field name="product_category">shoes</field>
+    <field name="brand">Red Dragon</field>
+    <field name="color">Black</field>
+    <field name="material">leather</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">111</field>
+    <field name="product_type">blue jeans</field>
+    <field name="product_category">pants</field>
+    <field name="style">boot cut</field>
+    <field name="style">regular fit</field>
+    <field name="brand">Lee</field>
+    <field name="color">Charcoal</field>
+    <field name="material">denim</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">112</field>
+    <field name="product_type">ring</field>
+    <field name="product_category">jewelry</field>
+    <field name="style">SeaGrape</field>
+    <field name="brand">Jean Designs</field>
+    <field name="color">silver</field>
+    <field name="material">silver</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">113</field>
+    <field name="product_type">designer jeans</field>
+    <field name="product_category">pants</field>
+    <field name="brand">Calvin Kline</field>
+    <field name="color">blue</field>
+    <field name="material">denim</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">114</field>
+    <field name="product_type">designer jeans</field>
+    <field name="product_category">pants</field>
+    <field name="style">flared</field>
+    <field name="brand">Acne Studios</field>
+    <field name="color">blue</field>
+    <field name="material">denim</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">115</field>
+    <field name="product_type">sneakers</field>
+    <field name="product_category">shoes</field>
+    <field name="brand">Keds</field>
+    <field name="color">red</field>
+    <field name="consumer_type">kids</field>
+  </doc>
+  <doc>
+    <field name="id">116</field>
+    <field name="product_type">flats</field>
+    <field name="product_category">shoes</field>
+    <field name="style">Mary Jane</field>
+    <field name="brand">Red Willow</field>
+    <field name="color">black</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">117</field>
+    <field name="product_type">beer box hat</field>
+    <field name="product_category">hat</field>
+    <field name="style">cowboy</field>
+    <field name="style">Canadian Flag</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">118</field>
+    <field name="product_type">hat box</field>
+    <field name="product_category">storage container</field>
+    <field name="material">Paper Maché</field>
+    <field name="brand">ArtMinds</field>
+  </doc>
+  <doc>
+    <field name="id">119</field>
+    <field name="product_type">hat box</field>
+    <field name="product_category">storage container</field>
+    <field name="material">recycled fiberboard</field>
+    <field name="color">white</field>
+    <field name="brand">Bisco</field>
+  </doc>
+  <doc>
+    <field name="id">120</field>
+    <field name="product_type">cowboy hat</field>
+    <field name="product_category">hat</field>
+    <field name="material">Natural Shantung Straw</field>
+    <field name="color">white</field>
+    <field name="brand">Stetson</field>
+  </doc>
+  <doc>
+    <field name="id">121</field>
+    <field name="product_type">cowboy hat</field>
+    <field name="product_category">hat</field>
+    <field name="material">Felt</field>
+    <field name="color">white</field>
+    <field name="brand">Rodeo King</field>
+  </doc>
+  <doc>
+    <field name="id">122</field>
+    <field name="product_type">dress shorts</field>
+    <field name="product_category">pants</field>
+    <field name="material">cotton</field>
+    <field name="color">white</field>
+    <field name="brand">Jockey</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">123</field>
+    <field name="product_type">short dress</field>
+    <field name="product_category">dress</field>
+    <field name="material">cotton</field>
+    <field name="color">blue</field>
+    <field name="brand">Old Navy</field>
+  </doc>
+  <doc>
+    <field name="id">124</field>
+    <field name="product_type">dress shorts</field>
+    <field name="product_category">pants</field>
+    <field name="style">Chino</field>
+    <field name="material">cotton</field>
+    <field name="color">black</field>
+    <field name="brand">Lauren Ralph Lauren</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">125</field>
+    <field name="product_type">prom dress</field>
+    <field name="product_category">dress</field>
+    <field name="style">short</field>
+    <field name="material">cotton</field>
+    <field name="color">blue</field>
+    <field name="brand">Michael Kors</field>
+  </doc>
+  <doc>
+    <field name="id">126</field>
+    <field name="product_type">shoe laces</field>
+    <field name="product_category">accessories</field>
+    <field name="material">cotton</field>
+    <field name="color">black</field>
+  </doc>
+  <doc>
+    <field name="id">127</field>
+    <field name="product_type">chukka boots</field>
+    <field name="product_category">shoes</field>
+    <field name="material">cotton twill</field>
+    <field name="color">blue</field>
+    <field name="brand">Toms</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">128</field>
+    <field name="product_type">perfume</field>
+    <field name="product_category">fragrences</field>
+    <field name="brand">White Linen</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">129</field>
+    <field name="product_type">dress shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="color">white</field>
+    <field name="material">linen</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">130</field>
+    <field name="product_type">dress pants</field>
+    <field name="product_category">pants</field>
+    <field name="color">white</field>
+    <field name="material">linen</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">131</field>
+    <field name="product_type">dress shoes</field>
+    <field name="product_category">shoes</field>
+    <field name="color">brown</field>
+    <field name="material">leather</field>
+    <field name="style">lace-up</field>  <!-- synonym lace-up shoe -->
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">132</field>
+    <field name="product_type">dress shoes</field>
+    <field name="product_category">shoes</field>
+    <field name="color">brown</field>
+    <field name="material">suede</field>
+    <field name="style">slip-on</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">133</field>
+    <field name="product_type">perfume</field>
+    <field name="product_category">fragrences</field>
+    <field name="brand">White Satin</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">134</field>
+    <field name="product_type">dress shoes</field>
+    <field name="product_category">shoes</field>
+    <field name="color">white</field>
+    <field name="material">satin</field>
+    <field name="style">wedding</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">135</field>
+    <field name="product_type">designer jeans</field>
+    <field name="product_category">pants</field>
+    <field name="brand">Calvin Klein</field>
+    <field name="color">blue</field>
+    <field name="style">pre-washed</field>
+    <field name="style">boot-cut</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">136</field>
+    <field name="product_type">designer jeans</field>  <!-- make jeans=>designer jeans -->
+    <field name="product_category">pants</field>
+    <field name="brand">Calvin Klein</field>
+    <field name="color">blue</field>
+    <field name="style">pre-washed</field>
+    <field name="style">straight leg</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">137</field>
+    <field name="product_type">designer jeans</field>
+    <field name="product_category">pants</field>
+    <field name="brand">Michael Kors</field>
+    <field name="color">blue</field>
+    <field name="style">boot-cut</field>
+    <field name="style">ripped</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">138</field>
+    <field name="product_type">designer jeans</field>
+    <field name="product_category">pants</field>
+    <field name="brand">Calvin Klein</field>
+    <field name="color">tan</field>
+    <field name="style">boot-cut</field>
+    <field name="style">slim fit</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">139</field>
+    <field name="product_type">jeans</field>
+    <field name="product_category">pants</field>
+    <field name="brand">Lee</field>
+    <field name="color">blue</field>
+    <field name="style">boot-cut</field>
+    <field name="style">slim fit</field>
+    <field name="style">pre-washed</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">140</field>
+    <field name="product_type">jeans</field>
+    <field name="product_category">pants</field>
+    <field name="brand">Wrangler</field>
+    <field name="color">blue</field>
+    <field name="style">faded</field>
+    <field name="style">regular fit</field>
+    <field name="style">pre-washed</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">141</field>
+    <field name="product_type">jeans</field>
+    <field name="product_category">pants</field>
+    <field name="brand">Lee</field>
+    <field name="color">blue</field>
+    <field name="style">boot-cut</field>
+    <field name="style">slim fit</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">142</field>
+    <field name="product_type">jeans</field>
+    <field name="product_category">pants</field>
+    <field name="brand">Lee</field>
+    <field name="color">blue</field>
+    <field name="style">straight leg</field>
+    <field name="style">slim fit</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">143</field>
+    <field name="product_type">jeans</field>
+    <field name="product_category">pants</field>
+    <field name="brand">Levis</field>
+    <field name="color">blue</field>
+    <field name="style">straight leg</field>
+    <field name="style">regular fit</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">144</field>
+    <field name="product_type">jeans</field>
+    <field name="product_category">pants</field>
+    <field name="brand">Lee</field>
+    <field name="color">black</field>
+    <field name="style">boot-cut</field>
+    <field name="style">slim fit</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">145</field>
+    <field name="product_type">jeans</field>
+    <field name="product_category">pants</field>
+    <field name="brand">Lee</field>
+    <field name="color">black</field>
+    <field name="style">straight leg</field>
+    <field name="style">slim fit</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">146</field>
+    <field name="product_type">jeans</field>
+    <field name="product_category">pants</field>
+    <field name="brand">Levis</field>
+    <field name="color">black</field>
+    <field name="style">straight leg</field>
+    <field name="style">regular fit</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">147</field>
+    <field name="product_type">briefs</field>
+    <field name="product_category">underwear</field>
+    <field name="brand">Calvin Klein</field>
+    <field name="color">red</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">148</field>
+    <field name="product_type">briefs</field>
+    <field name="product_category">underwear</field>
+    <field name="brand">Hanes</field>
+    <field name="color">white</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">149</field>
+    <field name="product_type">briefs</field>
+    <field name="product_category">underwear</field>
+    <field name="brand">Fruit of the Loom</field>
+    <field name="color">white</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">150</field>
+    <field name="product_type">undershirt</field>
+    <field name="product_category">underwear</field>
+    <field name="brand">Hanes</field>
+    <field name="color">white</field>
+    <field name="style">crew neck</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">151</field>
+    <field name="product_type">undershirt</field>
+    <field name="product_category">underwear</field>
+    <field name="brand">Hanes</field>
+    <field name="color">white</field>
+    <field name="style">V-neck</field>
+    <field name="material">cotton</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">152</field>
+    <field name="product_type">sneaker socks</field>
+    <field name="product_category">socks</field>
+    <field name="color">black</field>
+    <field name="brand">Hanes</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">153</field>
+    <field name="product_type">crew socks</field>
+    <field name="product_category">socks</field>
+    <field name="color">black</field>
+    <field name="brand">Joe Boxer</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">154</field>
+    <field name="product_type">crew socks</field>
+    <field name="product_category">socks</field>
+    <field name="color">white</field>
+    <field name="brand">Joe Boxer</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">155</field>
+    <field name="product_type">sweatshirt</field>
+    <field name="product_category">shirt</field>
+    <field name="color">grey</field>
+    <field name="style">crew neck</field>
+    <field name="brand">Joe Boxer</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">156</field>
+    <field name="product_type">blouse</field>
+    <field name="product_category">shirt</field>
+    <field name="color">white</field>
+    <field name="material">satin</field>
+    <field name="brand">Michael Kors</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">157</field>
+    <field name="product_type">short dress</field>
+    <field name="product_category">dress</field>
+    <field name="material">cotton</field>
+    <field name="color">red</field>
+    <field name="style">cocktail dress</field>
+    <field name="consumer_type">womens</field>
+  </doc>
+  <doc>
+    <field name="id">158</field>
+    <field name="product_type">dress shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="material">cotton</field>
+    <field name="colors">grey</field>
+    <field name="colors">white</field>
+    <field name="style">striped</field>
+    <field name="style">button-down</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">159</field>
+    <field name="product_type">dress shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="material">cotton</field>
+    <field name="color">grey</field>
+    <field name="style">solid</field>
+    <field name="style">button-down</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">160</field>
+    <field name="product_type">dress shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="material">cotton</field>
+    <field name="color">white</field>
+    <field name="style">solid</field>
+    <field name="style">button-down</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">161</field>
+    <field name="product_type">dress shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="material">cotton</field>
+    <field name="colors">grey</field>
+    <field name="colors">red</field>
+    <field name="style">striped</field>
+    <field name="style">button-down</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+</add>

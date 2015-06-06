@@ -113,14 +113,9 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       }
     }
       
-    String boostFactor = (String)initArgs.get( "boostFactor" );
+    Integer boostFactor = (Integer)initArgs.get( "boostFactor" );
     if (boostFactor != null) {
-      try {
-        this.boostFactor = new Integer( boostFactor );
-      }
-      catch ( NumberFormatException nfe ) {
-            
-      }
+      this.boostFactor = boostFactor;
     }
 
     String useAndForMV = (String)initArgs.get( "useAndForMultiValuedFields" );
@@ -208,11 +203,11 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     // Only build the field map and do the processing if we are the main event
     String isShard = params.get( "isShard" );
     if (isShard != null && isShard.equals( "true" )) {
-      Log.info( "A shard query: don't process!" );
+      Log.debug( "A shard query: don't process!" );
       return;
     }
       
-    Log.info( "prepare ..." );
+    Log.debug( "prepare ..." );
     if (initFieldMap) {
       synchronized( this ) {
         buildFieldMap( rb );
@@ -331,7 +326,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
             
           longestPhraseField = null;
           for (int i = startToken; i <= lastEndToken; i++) {
-            Log.info( "adding used token at " + i );
+            Log.debug( "adding used token at " + i );
             usedTokens.add( new Integer( i ) );
           }
           startToken = lastEndToken + 1;
@@ -360,10 +355,10 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
           }
         }
           
-        Log.info( "got qbuilder string = '" + qbuilder.toString() + "'" );
+        Log.debug( "got qbuilder string = '" + qbuilder.toString() + "'" );
         if (qbuilder.length() == 0 && fieldMap.size() > 0) {
           // build a filter query
-          Log.info( "setting q = *:*" );
+          Log.debug( "setting q = *:*" );
           modParams.set( "q", "*:*" );
           for (String fieldName : fieldMap.keySet() ) {
             String fq = getFilterQuery( rb, fieldName, fieldMap.get( fieldName ), fieldPositionMap.get( fieldName ), queryTokens, "" );
@@ -533,7 +528,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     
   // TODO: Return comma separated string if more than one
   private String getMappedFieldName( SynonymMap termMap, String phrase ) throws IOException {
-    Log.info( "getMappedFieldName: '" + phrase + "'" );
+    Log.debug( "getMappedFieldName: '" + phrase + "'" );
     FST<BytesRef> fst = termMap.fst;
     FST.BytesReader fstReader = fst.getBytesReader();
     FST.Arc<BytesRef> scratchArc = new FST.Arc<>( );
@@ -550,7 +545,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     while(charPos < noSpPhrase.length()) {
       final int codePoint = noSpPhrase.codePointAt( charPos );
       if (fst.findTargetArc( codePoint, scratchArc, scratchArc, fstReader) == null) {
-        Log.info( "No FieldName for " + phrase );
+        Log.debug( "No FieldName for " + phrase );
         return null;
       }
                 
@@ -582,7 +577,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       }
 
       if (mappedFields.size() == 1) {
-        Log.info( "returning mapped fieldName " + mappedFields.get( 0 ) );
+        Log.debug( "returning mapped fieldName " + mappedFields.get( 0 ) );
         return mappedFields.get( 0 );
       }
       else {
@@ -591,18 +586,18 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
           if (fieldBuilder.length() > 0) fieldBuilder.append( fieldDelim );
           fieldBuilder.append( fieldName );
         }
-        Log.info( "returning mapped fieldName " + fieldBuilder.toString( ) );
+        Log.debug( "returning mapped fieldName " + fieldBuilder.toString( ) );
         return fieldBuilder.toString( );
       }
     }
       
-    Log.info( "matchOutput but no FieldName for " + phrase );
+    Log.warn( "matchOutput but no FieldName for " + phrase );
     return null;
   }
 
     
   private void buildFieldMap( ResponseBuilder rb ) throws IOException {
-    Log.info( "buildFieldMap" );
+    Log.debug( "buildFieldMap" );
     SolrIndexSearcher searcher = rb.req.getSearcher();
     // build a synonym map from the SortedDocValues -
     // for each field value: lower case, stemmed, lookup synonyms from synonyms.txt - map to fieldValue
@@ -659,7 +654,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     
   private void addTerm( CharsRef fieldChars, String fieldValue, SynonymMap.Builder fieldBuilder, SynonymMap.Builder termBuilder ) throws IOException {
     
-    Log.info( "got fieldValue: '" + fieldValue + "'" );
+    Log.debug( "got fieldValue: '" + fieldValue + "'" );
     String nospVal = fieldValue.replace( ' ', '_' );
     Log.debug( "got nspace: '" + nospVal + "'" );
     CharsRef nospChars = new CharsRef( nospVal );
@@ -716,7 +711,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     ShardHandler shardHandler = shardHandlerFactory.getShardHandler();
     shardHandler.checkDistributed( rb );
       
-    Log.info( "Is Distributed = " + rb.isDistrib );
+    Log.debug( "Is Distributed = " + rb.isDistrib );
       
     if( rb.isDistrib ) {
       // create a ShardRequest that contains a Terms Request.
@@ -743,19 +738,19 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       sreq.params = params;
         
       for (String shard : rb.shards ) {
-        Log.info( "sending request to shard " + shard );
+        Log.debug( "sending request to shard " + shard );
         params.set(ShardParams.SHARD_URL, shard );
         shardHandler.submit( sreq, shard, params );
       }
         
       ShardResponse rsp = shardHandler.takeCompletedIncludingErrors( );
       if (rsp != null) {
-        Log.info( "got " + rsp.getShardRequest().responses.size( ) + " responses" );
+        Log.debug( "got " + rsp.getShardRequest().responses.size( ) + " responses" );
         for ( ShardResponse srsp : rsp.getShardRequest().responses ) {
-          Log.info( "Got terms response from " + srsp.getShard( ));
+          Log.debug( "Got terms response from " + srsp.getShard( ));
         
           if (srsp.getException() != null) {
-            Log.info( "ShardResponse Exception!! " + srsp.getException( ) );
+            Log.debug( "ShardResponse Exception!! " + srsp.getException( ) );
           }
         
           @SuppressWarnings("unchecked")
@@ -764,7 +759,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
             addTerms( terms, fieldBuilder, termBuilder, searchFields );
           }
           else {
-            Log.info( "terms was NULL! - make sure that /terms request handler is defined in solrconfig.xml" );
+            Log.warn( "terms was NULL! - make sure that /terms request handler is defined in solrconfig.xml" );
           }
         }
       }
@@ -779,7 +774,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       if (termList != null) {
         for (TermsResponse.Term tc : termList) {
           String term = tc.getTerm();
-          Log.info( "Add distributed term: " + fieldName + " = " + term );
+          Log.debug( "Add distributed term: " + fieldName + " = " + term );
           addTerm( fieldChars, term, fieldBuilder, termBuilder );
         }
       }

@@ -22,16 +22,16 @@ solrconfig.xml snippet:
   &lt;!-- test query auto filter -->
   &lt;requestHandler name="/autofilter" class="org.apache.solr.handler.component.SearchHandler">
     &lt;lst name="defaults">
-      &lt;str name="echoParams">explicit</str>
+      &lt;str name="echoParams">explicit&lt;/str>
       &lt;str name="df">text</str>
     &lt;/lst>
     &lt;arr name="first-components">
-      &lt;str>autofilter</str>
+      &lt;str>autofilter&lt;/str>
     &lt;/arr>
   &lt;/requestHandler>
 
   &lt;searchComponent name="autofilter" class="org.apache.solr.handler.component.QueryAutoFilteringComponent" >
-    &lt;str name="synonyms">synonyms.txt</str>
+    &lt;str name="synonyms">synonyms.txt&lt;/str>
   &lt;/searchComponent>
   
   &lt;!-- Needed for Autofiltering in SolrCloud -->
@@ -39,12 +39,25 @@ solrconfig.xml snippet:
   
   &lt;requestHandler name="/terms" class="org.apache.solr.handler.component.SearchHandler">
       &lt;arr name="components">
-          &lt;str>termsComp</str>
+          &lt;str>termsComp&lt;/str>
       &lt;/arr>
   &lt;/requestHandler>
 </pre>
 
 ## Filter Query or Boost Query:
+The Query Autofiltering component can be used in filter query or boost query mode. To use
+boost mode by default, add a "boostFactor" configuration setting to the configuration:
+
+<pre>
+  &lt;searchComponent name="autofilter" class="org.apache.solr.handler.component.QueryAutoFilteringComponent" >
+    &lt;str name="synonyms">synonyms.txt&lt;/str>
+    &lt;int name="boostFactor">100&lt;/int>
+  &lt;/searchComponent>
+</pre>
+
+To use autofiltering boost query mode "on demand" add an &amp;afb parameter to the query request as in &amp;afb=100
+
+##Sample Data
 
 
 

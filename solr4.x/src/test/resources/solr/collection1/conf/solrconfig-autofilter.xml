@@ -162,7 +162,7 @@
   </requestHandler>
   
   <searchComponent name="autofilterBQ" class="org.apache.solr.handler.component.QueryAutoFilteringComponent" >
-      <str name="boostFactor">100</str>
+      <int name="boostFactor">100</int>
   </searchComponent>
   
   <!-- test boost query with query auto filter -->
