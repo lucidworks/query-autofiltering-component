@@ -893,7 +893,7 @@
     <field name="product_type">sweater-tee</field>
     <field name="product_category">shirt</field>
     <field name="style">V-neck</field>
-    <field name="style">short-sleeve</field>
+    <field name="style">short sleeve</field>
     <field name="brand">J Crew Factory</field>
     <field name="color">green</field>
     <field name="material">cotton</field>
@@ -1510,10 +1510,33 @@
     <field name="product_type">dress shirt</field>
     <field name="product_category">shirt</field>
     <field name="material">cotton</field>
+    <field name="colors">blue</field>
+    <field name="colors">white</field>
+    <field name="style">striped</field>
+    <field name="style">oxford collar</field>
+    <field name="style">short sleeve</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">162</field>
+    <field name="product_type">dress shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="material">cotton</field>
     <field name="colors">grey</field>
     <field name="colors">red</field>
     <field name="style">striped</field>
-    <field name="style">button-down</field>
+    <field name="style">short sleeve</field>
+    <field name="consumer_type">mens</field>
+  </doc>
+  <doc>
+    <field name="id">163</field>
+    <field name="product_type">dress shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="material">cotton</field>
+    <field name="colors">grey</field>
+    <field name="colors">red</field>
+    <field name="style">striped</field>
+    <field name="style">long sleeve</field>
     <field name="consumer_type">mens</field>
   </doc>
 </add>
