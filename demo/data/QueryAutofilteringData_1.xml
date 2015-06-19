@@ -1539,4 +1539,13 @@
     <field name="style">long sleeve</field>
     <field name="consumer_type">mens</field>
   </doc>
+  <doc>
+    <field name="id">164</field>
+    <field name="product_type">dress shirt</field>
+    <field name="product_category">shirt</field>
+    <field name="material">linen</field>
+    <field name="color">white</field>
+    <field name="style">short sleeve</field>
+    <field name="consumer_type">mens</field>
+  </doc>
 </add>
