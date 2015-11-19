@@ -194,6 +194,26 @@
       </arr>
   </searchComponent>
   
+  
+  <requestHandler name="/autofilterVRB" class="org.apache.solr.handler.component.SearchHandler">
+      <lst name="defaults">
+          <str name="echoParams">explicit</str>
+          <str name="df">text</str>
+      </lst>
+      <arr name="first-components">
+          <str>autofilterVRB</str>
+      </arr>
+  </requestHandler>
+  
+  <searchComponent name="autofilterVRB" class="org.apache.solr.handler.component.QueryAutoFilteringComponent" >
+      <arr name="verbModifiers">
+          <str>written,wrote,composed:composer_s</str>
+          <str>performed,played,sang,recorded:performer_s</str>
+          <str>covered,covers:performer_s|version_s:Cover|original_performer_s:_ENTITY_,recording_type_s:Song=>original_performer_s:_ENTITY_</str>
+      </arr>
+  </searchComponent>
+
+  
   <!-- Needed for AutoFiltering in SolrCloud -->
   <searchComponent name="termsComp" class="org.apache.solr.handler.component.TermsComponent"/>
   

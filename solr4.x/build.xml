@@ -59,7 +59,7 @@
     </javac>
   </target>
 
-  <target name="dist" depends="compile,test" description="generate the distribution" >
+  <target name="dist" depends="compile" description="generate the distribution" >
     <!-- Create the distribution directory -->
     <mkdir dir="${dist.dir}"/>
     <jar jarfile="${dist.dir}/${project.name}-${version.number}.jar" basedir="${classes.dir}"/>
@@ -79,13 +79,13 @@
     <junit printsummary="yes" fork="yes" haltonfailure="yes">
       <formatter usefile="false" type="plain"/>
       <classpath>
-        <pathelement location="${ivy.lib.dir}/lucene-test-framework-${lucene.version}.jar" />
-        <pathelement location="${ivy.lib.dir}/solr-test-framework-${solr.version}.jar" />
         <path refid="test-classpath"/>
         <pathelement location="${classes.dir}"/>
         <pathelement location="${test.classes.dir}" />
         <pathelement location="${test.resources}" />
         <pathelement location="${ivy.lib.dir}/junit-4.11.jar"/>
+        <pathelement location="${ivy.lib.dir}/lucene-test-framework-${lucene.version}.jar" />
+        <pathelement location="${ivy.lib.dir}/solr-test-framework-${solr.version}.jar" />
       </classpath> 
       <assertions>
         <enable/>

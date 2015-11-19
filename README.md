@@ -73,5 +73,16 @@ To compare the behavior of the search engine with and without autofiltering, use
 
 Happy autofiltering!
 
+#High Level Design 
+
+[ basic control and data flow ] - build synonym maps (finite state transform)
+
+query parsing steps
+alternative parsings of a phrase - alternative parsing must be able to use the complete phrase - partial mappings are rejected in favor of longer matches (e.g. "red baron pizza" - partial match "red" will be rejected.  "white linen shirts"  - "white linen" has two alternate and complete matches - brand:"white linen" and (color:white and material:linen)
+handling boolean terms in user query
+verb/adjective/preposition mapping
+
+
+
 
 

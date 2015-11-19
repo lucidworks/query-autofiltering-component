@@ -34,11 +34,17 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.KeywordTokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.synonym.SynonymMap;
 import org.apache.lucene.analysis.synonym.SynonymMap.Builder;
 import org.apache.lucene.analysis.synonym.SolrSynonymParser;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
 import org.apache.lucene.analysis.util.TokenizerFactory;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
+
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.util.fst.FST;
 
 import java.util.ArrayList;
@@ -55,6 +61,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
@@ -103,6 +110,9 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     
   private String fieldSplitExpr = "\\|";
     
+  // map of a "verb" phrase to a metadata field
+  private ArrayList<ModifierDefinition> verbModifierList;
+    
   @Override
   public void init( NamedList initArgs ) {
     List<String> excludeFields = (List<String>) initArgs.get("excludeFields");
@@ -110,6 +120,25 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       this.excludeFields = new HashSet<String>( );
       for (String field : excludeFields ) {
           this.excludeFields.add( field );
+      }
+    }
+      
+    List<String> verbModifiers = (List<String>)initArgs.get( "verbModifiers" );
+    if (verbModifiers != null) {
+      this.verbModifierList = new ArrayList<ModifierDefinition>( );
+      for (String modifier : verbModifiers) {
+        String modifierPhrase = new String( modifier.substring( 0, modifier.indexOf( ":" )));
+        String modifierFields = new String( modifier.substring( modifier.indexOf( ":" ) + 1 ));
+              
+        if (modifierPhrase.indexOf( "," ) > 0) {
+          String[] phrases = modifierPhrase.split( "," );
+          for (int i = 0; i < phrases.length; i++) {
+            addModifier( phrases[i], modifierFields );
+          }
+        }
+        else {
+          addModifier( modifierPhrase, modifierFields );
+        }
       }
     }
       
@@ -131,6 +160,57 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       
     initParams = initArgs;
   }
+    
+  private void addModifier( String modifierPhrase, String modifierFields ) {
+    Log.info( "addModifier: " + modifierPhrase + ": " + modifierFields );
+    ModifierDefinition modDef = new ModifierDefinition( );
+    modDef.modifierPhrase = modifierPhrase.toLowerCase( );
+        
+    if (modifierFields.indexOf( fieldDelim ) > 0) {
+      modDef.filterFields = new HashMap<String,String>( );
+      String fieldPairs = new String( modifierFields.substring( modifierFields.indexOf( fieldDelim ) + 1 ));
+      modifierFields = new String( modifierFields.substring( 0, modifierFields.indexOf( fieldDelim )));
+      Log.info( "fieldPairs = " + fieldPairs );
+            
+      String modifierTemplate = null;
+      if (fieldPairs.indexOf( fieldDelim ) > 0) {
+        modifierTemplate = new String( fieldPairs.substring( fieldPairs.indexOf( fieldDelim ) + 1 ));
+        fieldPairs = new String( fieldPairs.substring( 0, fieldPairs.indexOf( fieldDelim )));
+      }
+            
+      if (fieldPairs.indexOf( "," ) > 0) {
+        String[] fieldPairList = fieldPairs.split( "," );
+        for (int i = 0; i < fieldPairList.length; i++) {
+          String field = new String( fieldPairList[i].substring( 0, fieldPairList[i].indexOf( ":" )));
+          String value = new String(fieldPairList[i].substring( fieldPairList[i].indexOf( ":" ) + 1 ));
+          modDef.filterFields.put( field, value );
+        }
+      }
+      else {
+        String field = new String(fieldPairs.substring( 0, fieldPairs.indexOf( ":" )));
+        String value = new String( fieldPairs.substring( fieldPairs.indexOf( ":" ) + 1 ));
+        modDef.filterFields.put( field, value );
+      }
+            
+      if (modifierTemplate != null) {
+        modDef.templateRule = new ModifierTemplateRule( modifierTemplate );
+      }
+    }
+    modDef.modifierFields = new ArrayList<String>( );
+    if (modifierFields.indexOf( "," ) > 0) {
+      String[] fields = modifierFields.split( "," );
+      for (int i = 0; i < fields.length; i++) {
+        modDef.modifierFields.add( fields[i] );
+      }
+    }
+    else {
+      modDef.modifierFields.add( modifierFields );
+    }
+        
+    modDef.modTokens = modDef.modifierPhrase.split( " " );
+    verbModifierList.add( modDef );
+  }
+
     
   @Override
   public void inform( SolrCore core ) {
@@ -207,7 +287,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       return;
     }
       
-    Log.debug( "prepare ..." );
+    Log.info( "prepare ..." );
     if (initFieldMap) {
       synchronized( this ) {
         buildFieldMap( rb );
@@ -236,12 +316,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       
     // tokenize the query string, if any part of it matches, remove the token from the list and
     // add a filter query with <categoryField>:value:
-    StringTokenizer strtok = new StringTokenizer( qStr, " .,:;\"'" );
-    ArrayList<String> queryTokens = new ArrayList<String>( );
-    while (strtok.hasMoreTokens( ) ) {
-      String tok = strtok.nextToken( ).toLowerCase( );
-      queryTokens.add( tok );
-    }
+    ArrayList<char[]> queryTokens = tokenize( qStr );
       
     if (queryTokens.size( ) >= mintok) {
       ModifiableSolrParams modParams = new ModifiableSolrParams( params );
@@ -251,12 +326,13 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     }
   }
     
-  private boolean findPattern( ArrayList<String> queryTokens, ResponseBuilder rb, ModifiableSolrParams modParams ) throws IOException {
+  private boolean findPattern( ArrayList<char[]> queryTokens, ResponseBuilder rb, ModifiableSolrParams modParams ) throws IOException {
     Log.debug( "findPattern " );
 
     HashSet<Integer> usedTokens = new HashSet<Integer>( );
     HashMap<String,ArrayList<String>> fieldMap = new HashMap<String,ArrayList<String>>( );
     HashMap<String,int[]> fieldPositionMap = new HashMap<String,int[]>( );
+    HashMap<String,int[]> entityPositionMap = (verbModifierList != null) ? new HashMap<String,int[]>()  : null;
       
     String longestPhraseField = null;
     int startToken = 0;
@@ -282,7 +358,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
         // create matching phrase from startToken -> endToken
         String phrase = getPhrase( queryTokens, startToken, lastEndToken );
         Log.debug( "get Indexed Term for " + phrase );
-        String indexedTerm = getMappedFieldName( termMap, phrase );
+        String indexedTerm = getMappedFieldName( termMap, phrase.toLowerCase( ));
         if (indexedTerm == null) {
           indexedTerm = getMappedFieldName( termMap, getStemmed( phrase ));
         }
@@ -296,6 +372,14 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
             valList = new ArrayList<String>( );
             fieldMap.put( longestPhraseField, valList );
           }
+            
+          Log.info( "indexedTerm: " + indexedTerm );
+          int[] entityPosition = null;
+          if (entityPositionMap != null) {
+            entityPosition = new int[2];
+            entityPosition[0] = startToken;
+            entityPosition[1] = endToken-1;
+          }
           
           Log.debug( "indexedTerm: " + indexedTerm );
           if (indexedTerm.indexOf( fieldDelim ) > 0)
@@ -303,10 +387,12 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
             String[] indexedTerms = indexedTerm.split( fieldSplitExpr );
             for (int t = 0; t < indexedTerms.length; t++) {
               valList.add( indexedTerms[t] );
+              if (entityPositionMap != null) entityPositionMap.put( indexedTerms[t], entityPosition );
             }
           }
           else {
             valList.add( indexedTerm );
+            if (entityPositionMap != null) entityPositionMap.put( indexedTerm, entityPosition );
           }
             
           // save startToken and lastEndToken so can use for boolean operator context
@@ -339,6 +425,11 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       
     if (usedTokens.size( ) > 0) {
         
+      // filter field maps based on verbs here:
+      if (entityPositionMap != null) {
+        filterFieldMap( queryTokens, fieldMap, entityPositionMap, fieldPositionMap );
+      }
+        
       String useBoost = modParams.get( BOOST_PARAM );
       Integer boostFactor = (useBoost != null) ? new Integer( useBoost ) : this.boostFactor;
       if (boostFactor == null) {
@@ -346,18 +437,17 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
         if (usedTokens.size( ) < queryTokens.size( ) ) {
           for (int i = 0; i < queryTokens.size(); i++) {
             if (boostFactor != null || usedTokens.contains( new Integer( i ) ) == false ) {
-              String token = queryTokens.get( i );
-              if (stopwords == null || !stopwords.contains( token.toLowerCase( ) )) {
-                if (qbuilder.length() > 0) qbuilder.append( " " );
-                qbuilder.append( token );
-              }
+              char[] token = queryTokens.get( i );
+              if (qbuilder.length() > 0) qbuilder.append( " " );
+              qbuilder.append( token );
             }
           }
         }
           
         Log.debug( "got qbuilder string = '" + qbuilder.toString() + "'" );
         if (qbuilder.length() == 0 && fieldMap.size() > 0) {
-          // build a filter query
+          // build a filter query -
+          // EH: can't do this if dismax
           Log.debug( "setting q = *:*" );
           modParams.set( "q", "*:*" );
           for (String fieldName : fieldMap.keySet() ) {
@@ -396,21 +486,23 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     return false;
   }
     
-  private String getPhrase( ArrayList<String> tokens, int startToken, int endToken ) {
+  private String getPhrase( ArrayList<char[]> tokens, int startToken, int endToken ) {
     return getPhrase( tokens, startToken, endToken, "_" );
   }
     
-  private String getPhrase( ArrayList<String> tokens, int startToken, int endToken, String tokenSep ) {
+  private String getPhrase( ArrayList<char[]> tokens, int startToken, int endToken, String tokenSep ) {
     StringBuilder strb = new StringBuilder( );
     for (int i = startToken; i <= endToken; i++) {
       if (i > startToken) strb.append( tokenSep );
+
       strb.append( tokens.get( i ) );
     }
+      Log.debug( "getPhrase returns " + strb.toString( ) );
     return strb.toString( );
   }
     
   private String getFilterQuery( ResponseBuilder rb, String fieldName, ArrayList<String> valList,
-                                 int[] termPosRange, ArrayList<String> queryTokens, String suffix) {
+                                 int[] termPosRange, ArrayList<char[]> queryTokens, String suffix) {
     if (fieldName.indexOf( fieldDelim ) > 0) {
       return getFilterQuery( rb, fieldName.split( fieldSplitExpr ), valList, termPosRange, queryTokens, suffix );
     }
@@ -424,6 +516,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
         String singleTermQuery = getSingleTermQuery( term );
         if (singleTermQuery != null) {
           StringBuilder strb = new StringBuilder( );
+          // EH: possible meta-escaping problem if value includes {!field f=<fieldName>}value
           strb.append( "(" ).append( fieldName ).append( ":" )
               .append( term ).append( " OR (" ).append( singleTermQuery ).append( "))" ).append( suffix );
           Log.debug( "returning composite query: " + strb.toString( ) );
@@ -443,8 +536,9 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       // if query has 'or' in it and or is at a position 'within' the values for this field ...
       if (useAnd) {
         for (int i = termPosRange[0] + 1; i < termPosRange[1]; i++ ) {
-          String qToken = queryTokens.get( i );
-          if (qToken.equalsIgnoreCase( "or" )) {
+          char[] qToken = queryTokens.get( i );
+          // is the token 'or'?
+          if (qToken.length == 2 && qToken[0] == 'o' && qToken[1] == 'r' ) {
             useAnd = false;
             break;
           }
@@ -461,7 +555,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
   }
     
   private String getFilterQuery( ResponseBuilder rb, String[] fieldNames, ArrayList<String> valList,
-                                 int[] termPosRange, ArrayList<String> queryTokens, String suffix) {
+                                 int[] termPosRange, ArrayList<char[]> queryTokens, String suffix) {
     StringBuilder filterQBuilder = new StringBuilder( );
     for (int i = 0; i < fieldNames.length; i++) {
       if (i > 0) filterQBuilder.append( " OR " );
@@ -470,9 +564,9 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     return "(" + filterQBuilder.toString() + ")";
   }
     
-  private String getFieldNameFor( ArrayList<String> queryTokens, int startToken, int endToken ) throws IOException {
+  private String getFieldNameFor( ArrayList<char[]> queryTokens, int startToken, int endToken ) throws IOException {
     String phrase = getPhrase( queryTokens, startToken, endToken );
-    String fieldName = getFieldNameFor( phrase );
+    String fieldName = getFieldNameFor( phrase.toLowerCase( ) );
     if (fieldName != null) return fieldName;
       
     String stemmed = getStemmed( phrase );
@@ -522,7 +616,8 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
   }
     
   private String getFieldNameFor( String phrase )  throws IOException {
-    return ("*".equals( phrase) || "* *".equals( phrase )) ? null : getMappedFieldName( fieldMap, phrase );
+    Log.debug( "getFieldNameFor '" + phrase + "'" );
+    return ("*".equals( phrase) || "* *".equals( phrase )) ? null : getMappedFieldName( fieldMap, phrase.toLowerCase( ) );
   }
 
     
@@ -884,10 +979,423 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     }
   }
     
+  private ArrayList<char[]> tokenize( String input ) throws IOException {
+
+    Log.debug( "tokenize '" + input + "'" );
+    ArrayList<char[]> tokens = new ArrayList<char[]>( );
+    Tokenizer tk = getTokenizerImpl( input );
+
+    CharTermAttribute term = tk.addAttribute( CharTermAttribute.class );
+    tk.reset( );
+    while (tk.incrementToken( ) ) {
+      int bufLen = term.length();
+      char[] copy = new char[ bufLen ];
+      System.arraycopy(term.buffer( ), 0, copy, 0, bufLen );
+      tokens.add( copy );
+    }
+
+    return tokens;
+  }
+    
+  private Tokenizer getTokenizerImpl( String input ) throws IOException {
+    StandardTokenizer sttk = new StandardTokenizer( );
+    sttk.setReader( new StringReader( input ) );
+    return sttk;
+  }
+    
   @Override
   public void process(ResponseBuilder rb) throws IOException
   {
     // do nothing - needed so we don't execute the query here.
+  }
+    
+  // ===========================================================================
+  // Verb Modifier Code
+  // Using the verb modifier map if a verb modifier is adjacent to a field mapped phrase (can have noise words between)
+  // restrict the field names in the list to the one that is linked to the verb modifier
+  // TODO - how to deal with 'and' and 'or' Between modifiers
+  // ===========================================================================
+  private void filterFieldMap( ArrayList<char[]> queryTokens, HashMap<String,ArrayList<String>> fieldMap,
+                               HashMap<String,int[]> entityPositionMap, HashMap<String,int[]> fieldPositionMap ) {
+        
+    Log.info( "filterFieldMap" );
+    // need to find the modifiers that are in THIS set of tokens by position, in the order used ...
+    ArrayList<ModifierInstance> usedModifiers = getOrderedModifierPositions( queryTokens );
+    if (usedModifiers == null || usedModifiers.size() == 0) {
+      return; // nothing to do ...
+    }
+        
+    // find the verb modifiers in the query tokens list
+    // need to keep track of 'next entity' and 'last entity' as we iterate
+    boolean remapped = false;
+    for (ModifierInstance modInstance : usedModifiers) {
+      if (modInstance.templateRule != null) applyModifierTemplateRule( entityPositionMap, fieldMap, modInstance.templateRule );
+            
+      HashMap<String,String> fieldNameKeys = getFieldKeysForFieldName( modInstance.modifierFields, fieldMap );
+      if (fieldNameKeys != null) {
+        // find the entity just before (maximum pos before) or after (minimum pos after) the modifier phrase from entityPositionMap
+        // assumming here that the modifiers can work bi-directionally
+        // as in 'songs Paul McCartney composed'  or 'songs Paul McCartney has written' vs. 'songs composed by Paul McCartney'
+        // or 'Bands Paul McCartney was in'  vs. 'who was in the Who'
+        for (String fieldNameKey : fieldNameKeys.keySet() ) {
+          String modifierField = fieldNameKeys.get( fieldNameKey );
+                    
+          HashSet<String> entityPhrases = findLastEntitiesBefore( entityPositionMap, modInstance, usedModifiers, fieldMap.get( fieldNameKey ) );
+          if ( entityPhrases != null ) {
+            remapEntity( fieldNameKey, entityPhrases, modifierField, fieldMap, fieldPositionMap, entityPositionMap );
+            remapped = true;
+          }
+          else {
+            entityPhrases = findFirstEntitiesAfter( entityPositionMap, modInstance, usedModifiers, fieldMap.get( fieldNameKey ) );
+            if (entityPhrases != null) {
+              remapEntity( fieldNameKey, entityPhrases, modifierField, fieldMap, fieldPositionMap, entityPositionMap );
+              remapped = true;
+            }
+          }
+        }
+      }
+            
+      // add any filter fields for the verbs:
+      if (remapped && modInstance.filterFields != null) {
+        Log.info( "checking verb modifiers for " + modInstance.modifierFields );
+        for (String filtField : modInstance.filterFields.keySet( ) ) {
+          ArrayList<String> valList = new ArrayList<String>( );
+          valList.add( modInstance.filterFields.get( filtField ) );
+          Log.info( "setting verb filter: " + filtField + ":" + modInstance.filterFields.get( filtField ) );
+          fieldMap.put( filtField, valList );
+          fieldPositionMap.put( filtField, modInstance.modifierPos );
+        }
+      }
+    }
+  }
+    
+  private ArrayList<ModifierInstance> getOrderedModifierPositions( ArrayList<char[]> queryTokens ) {
+    ArrayList<ModifierInstance> modifiers = null;
+    int i = 0;
+    while (i < queryTokens.size( ) ) {
+      char[] token = queryTokens.get( i );
+      ModifierDefinition modifier = findModifier( token );
+      if (modifier != null && matchesModifier( modifier.modTokens, queryTokens, i )) {
+        Log.info( "Adding Modifier Instance '" + modifier.modifierPhrase + "'" );
+        ModifierInstance modInst = new ModifierInstance( );
+        modInst.modifierPhrase = modifier.modifierPhrase;
+        modInst.modifierFields = modifier.modifierFields;
+        Log.info( "fields: " );
+        for (String modField : modifier.modifierFields ) { Log.info( "   " + modField ); }
+        modInst.modifierPos = new int[2];
+        modInst.modifierPos[0] = i;
+        modInst.modifierPos[1] = i + modifier.modTokens.length - 1;
+          
+        modInst.filterFields = modifier.filterFields;
+        modInst.templateRule = modifier.templateRule;
+        if (modifiers == null) modifiers = new ArrayList<ModifierInstance>( );
+        modifiers.add( modInst );
+        i += modifier.modTokens.length;
+      }
+      else {
+        ++i;
+      }
+    }
+        
+    return modifiers;
+  }
+    
+  private ModifierDefinition findModifier( char[] queryToken ) {
+    for (ModifierDefinition modifier : verbModifierList ) {
+      if (modifier.modifierPhrase.startsWith( new String( queryToken ) )) {
+        return modifier;
+      }
+    }
+    return null;
+  }
+    
+  private boolean matchesModifier( String[] modTokens, ArrayList<char[]> queryTokens, int start ) {
+    int i = 0;
+    while ( (start + i) < queryTokens.size( ) && i < modTokens.length ) {
+      String token = new String( queryTokens.get( start + i ) );
+      if (!token.toLowerCase( ).equals( modTokens[i].toLowerCase( ))) return false;
+      if (++i == modTokens.length) return true;
+    }
+    return false;
+  }
+    
+    
+  private HashMap<String,String> getFieldKeysForFieldName( ArrayList<String> modifierFields, HashMap<String,ArrayList<String>> fieldMap ) {
+    Log.info( "getFieldKeysForFieldName" );
+    HashMap<String,String> fieldKeys = null;
+    for (String modifierField : modifierFields ) {
+      Log.info( "testing modifierField: " + modifierField );
+      for (String fieldNameList : fieldMap.keySet() ) {
+        Log.info( "testing fieldNameList: " + fieldNameList );
+        String[] fields = fieldNameList.split( fieldSplitExpr );
+        for (int i = 0; i < fields.length; i++) {
+          if ( fields[i].equals( modifierField )) {
+            if (fieldKeys == null) fieldKeys = new HashMap<String,String>( );
+            Log.info( "adding field Key " + fieldNameList + ": " + modifierField );
+            fieldKeys.put( fieldNameList, modifierField );
+          }
+        }
+      }
+    }
+    return fieldKeys;
+  }
+
+    
+    
+  // find entities before the current mod pos but after the last one (if modPos is not first in the list of modifier positions)
+  // we also need to keep track of the operator (???)
+  private HashSet<String> findLastEntitiesBefore( HashMap<String,int[]> entityPositionMap, ModifierInstance modifier,
+                                                  ArrayList<ModifierInstance> usedModifiers, ArrayList<String> fieldVals ) {
+    Log.info( "findLastEntitiesBefore" );
+    HashSet<String> entitySet = null;
+    int previousModifierPosition = -1;
+    int thisModPos = modifier.modifierPos[0];
+        
+    for ( ModifierInstance mod : usedModifiers ) {
+      if (mod.modifierPos[1] < thisModPos ) {
+        previousModifierPosition = mod.modifierPos[1];
+        break;
+      }
+    }
+        
+    for (String entityPhrase : entityPositionMap.keySet( ) ) {
+      Log.info( " testing " + entityPhrase );
+      if (fieldVals.contains( entityPhrase)) {
+        int[] entityPos = entityPositionMap.get( entityPhrase );
+        Log.info( "entity is at " + entityPos[0] + "," + entityPos[1] );
+        Log.info( "mod is at " + thisModPos + " previous mod was " +  previousModifierPosition  );
+        if (entityPos[1] < thisModPos && entityPos[0] > previousModifierPosition ) {
+          if (entitySet == null) entitySet = new HashSet<String>( );
+          Log.info( "adding " + entityPhrase );
+          entitySet.add( entityPhrase );
+        }
+      }
+    }
+        
+    return entitySet;
+  }
+    
+  // find entities after the current mod pos but before the next modifier
+  private HashSet<String> findFirstEntitiesAfter( HashMap<String,int[]> entityPositionMap, ModifierInstance modifier,
+                                                  ArrayList<ModifierInstance> usedModifiers, ArrayList<String> fieldVals ) {
+    Log.info( "findFirstEntitiesAfter" );
+    HashSet<String> entitySet = null;
+    int nextModifierPosition = Integer.MAX_VALUE;
+    int thisModPos = modifier.modifierPos[1];
+        
+    for (ModifierInstance mod : usedModifiers ) {
+      if (mod.modifierPos[0] > thisModPos ) {
+        nextModifierPosition = mod.modifierPos[0];
+        break;
+      }
+    }
+        
+    for (String entityPhrase : entityPositionMap.keySet( ) ) {
+      Log.info( " testing " + entityPhrase );
+      if (fieldVals.contains( entityPhrase)) {
+        int[] entityPos = entityPositionMap.get( entityPhrase );
+        Log.info( "entity is at " + entityPos[0] + "," + entityPos[1] );
+        Log.info( "mod is at " + thisModPos + " next mod is " +  nextModifierPosition  );
+        if (entityPos[0] > thisModPos && entityPos[1] < nextModifierPosition ) {
+          if (entitySet == null) entitySet = new HashSet<String>( );
+          Log.info( "adding " + entityPhrase );
+          entitySet.add( entityPhrase );
+        }
+      }
+    }
+        
+    return entitySet;
+  }
+    
+    
+  private void remapEntity( String fieldNameKey, HashSet<String> entityValues, String modifierField,
+                            HashMap<String,ArrayList<String>> fieldMap, HashMap<String,int[]> fieldPositionMap, HashMap<String,int[]> entityPositionMap ) {
+    // find the fieldMap key that contains the fieldName
+    ArrayList<String> fieldVals = fieldMap.get( fieldNameKey );
+        
+    boolean allMatch = true;
+    for (String fieldVal : fieldVals ) {
+      if (!entityValues.contains( fieldVal )) {
+        allMatch = false;
+        break;
+      }
+    }
+        
+    // if the field values in the fieldMap match the set of entity values -- remove the fieldNameKey and replace it with the modifierField in the map
+    if ( allMatch ) {
+      if (fieldNameKey.equals( modifierField )) return;
+        
+      fieldMap.remove( fieldNameKey );
+      Log.info( "remapping: " + modifierField );
+      for( String val : fieldVals ) { Log.info( "    " + val ); }
+      fieldMap.put( modifierField, fieldVals );
+    }
+    else {
+      // for a partial map - remove the field values in the fieldMap that are in the entityValues set, and create a new entry with modifierField => entityValues
+      ArrayList<String> remaining = new ArrayList<String>( );
+      ArrayList<String> modList = new ArrayList<String>( );
+      for (String fieldVal : fieldVals ) {
+        if (entityValues.contains( fieldVal )) {
+          modList.add( fieldVal );
+        }
+        else {
+          remaining.add( fieldVal );
+        }
+      }
+        
+      fieldMap.put( modifierField, modList );
+      fieldPositionMap.put( modifierField, getPosArrayFor( modList, entityPositionMap ) );
+            
+      fieldMap.put( fieldNameKey, remaining );
+      fieldPositionMap.put( fieldNameKey, getPosArrayFor( remaining, entityPositionMap ) );
+    }
+  }
+    
+  private void applyModifierTemplateRule( HashMap<String, int[]> entityPositionMap, HashMap<String,ArrayList<String>> fieldMap, ModifierTemplateRule modifierRule ) {
+    Log.info( "applyModifierTemplateRule" );
+    // find entity_1_field - from field map - find entityPosition from values
+    ArrayList<String> firstEntityList = findEntityList( fieldMap, modifierRule.entity_1_field );
+    if (firstEntityList == null) return;
+    String firstFieldList = null;
+    String entityValue = null;
+        
+    for (String firstEntity : firstEntityList ) {
+      Log.info( "checking entity: " + firstEntity );
+      int[] firstPos = entityPositionMap.get( firstEntity );
+      int[] secondPos = entityPositionMap.get( modifierRule.entity_2_value );
+      if (secondPos != null && (secondPos[0] == firstPos[1] + 1) && findEntityList( fieldMap, modifierRule.entity_2_field ) != null ) {
+        if (modifierRule.entity_1_value.equals( "_ENTITY_" )) {
+          Log.info( "'" + firstEntity + "' matches pattern" );
+          entityValue = firstEntity;
+          ArrayList<String> outputList = new ArrayList<String>( );
+          outputList.add( firstEntity );
+          firstFieldList = findFieldList( fieldMap, modifierRule.entity_1_field );
+          fieldMap.put( modifierRule.output_field, outputList );
+          break;
+        }
+      }
+    }
+        
+    if ( firstFieldList != null ) {
+      // remove remapped entity field from field list
+      Log.info( "removing " + modifierRule.entity_1_field + " from " + firstFieldList );
+      String[] fields = firstFieldList.split( "\\|" );
+      StringBuilder stb = new StringBuilder( );
+      for (int i = 0; i < fields.length; i++) {
+        if (fields[i].equals( modifierRule.entity_1_field) == false ) {
+          if (stb.length() > 0) stb.append( "," );
+          stb.append( fields[i] );
+        }
+      }
+            
+      // remove entityValue from fieldMap arrayList
+      if (stb.length() > 0) {
+        Log.info( "new field list: " + stb.toString( ) );
+        ArrayList<String> remainder = new ArrayList<String>( );
+        for (String firstEntity : firstEntityList ) {
+          if (firstEntity.equals( entityValue ) == false ) {
+            Log.info( "adding remaining value " + firstEntity );
+            remainder.add( firstEntity );
+          }
+        }
+        if (remainder.size( ) > 0) {
+          Log.info( "remainder fields: " + stb.toString( ) );
+          fieldMap.put( stb.toString( ), remainder );
+        }
+                
+        Log.info( "removing field: " + firstFieldList );
+        fieldMap.remove( firstFieldList );
+      }
+    }
+  }
+    
+  private ArrayList<String> findEntityList( HashMap<String,ArrayList<String>> fieldMap, String entityField ) {
+    for (String fieldList : fieldMap.keySet() ) {
+      if (fieldList.contains( entityField )) {
+        return fieldMap.get( fieldList );
+      }
+    }
+    return null;
+  }
+    
+  private String findFieldList( HashMap<String,ArrayList<String>> fieldMap, String entityField ) {
+    for (String fieldList : fieldMap.keySet() ) {
+      if (fieldList.contains( entityField )) {
+        return fieldList;
+      }
+    }
+    return null;
+  }
+    
+  private int[] getPosArrayFor( ArrayList<String> entities, HashMap<String,int[]> entityPositionMap ) {
+    int[] newPosArray = null;
+    for ( String entity : entities ) {
+      int[] entityPos = entityPositionMap.get( entity );
+      if (entityPos != null) {
+        if (newPosArray == null) newPosArray = entityPos;
+        else {
+          if (entityPos[1] < newPosArray[0] ) {
+            newPosArray[0] = entityPos[0];
+          }
+          if (entityPos[0] > newPosArray[1] ) {
+            newPosArray[1] = entityPos[1];
+          }
+        }
+      }
+    }
+        
+    return newPosArray;
+  }
+    
+  private class ModifierDefinition
+  {
+    String modifierPhrase;  // the phrase that will modify like 'was in'
+    ArrayList<String> modifierFields;   // the field(s) that will be used like 'memberOfGroup_ss,groupMembers_ss'
+    String[] modTokens;
+    HashMap<String,String> filterFields;
+    ModifierTemplateRule templateRule;
+  }
+    
+  private class ModifierInstance
+  {
+    String modifierPhrase;
+    ArrayList<String> modifierFields;
+    int[] modifierPos;
+    HashMap<String,String> filterFields;
+    ModifierTemplateRule templateRule;
+  }
+    
+  // original_performer_s:_ENTITY_,recording_type_ss:Song=>original_performer_s:_ENTITY_
+  private class ModifierTemplateRule
+  {
+    String entity_1_field;
+    String entity_1_value;
+        
+    String entity_2_field;
+    String entity_2_value;
+        
+    String output_field;
+    String output_value;
+        
+    ModifierTemplateRule( String templatePattern ) {
+      String leftSide = new String(templatePattern.substring( 0, templatePattern.indexOf( "=>" )));
+      String rightSide = new String(templatePattern.substring( templatePattern.indexOf( "=>" ) + 2 ));
+        
+      String entity_1 = new String( leftSide.substring( 0, leftSide.indexOf( "," )));
+      String entity_2 = new String( leftSide.substring( leftSide.indexOf( "," ) + 1 ));
+        
+      entity_1_field = new String( entity_1.substring( 0, entity_1.indexOf( ":" )));
+      entity_1_value = new String( entity_1.substring( entity_1.indexOf( ":" ) + 1 ));
+      entity_2_field = new String( entity_2.substring( 0, entity_2.indexOf( ":" )));
+      entity_2_value = new String( entity_2.substring( entity_2.indexOf( ":" ) + 1 ));
+        
+      output_field = new String( rightSide.substring( 0, rightSide.indexOf( ":" )));
+      output_value = new String( rightSide.substring( rightSide.indexOf( ":" ) + 1 ));
+        
+      Log.info( "entity_1_field: " + entity_1_field + " entity_1_value: " + entity_1_value );
+      Log.info( "entity_2_field: " + entity_2_field + " entity_2_value: " + entity_2_value );
+      Log.info( "output_field: " + output_field + " output_value: " + output_value );
+    }
   }
     
 }

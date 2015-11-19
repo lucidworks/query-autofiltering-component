@@ -376,6 +376,7 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
               , "//*[@numFound='3']" );
   }
     
+  @Test
   public void testAmbiguousFields( ) {
     clearIndex();
     assertU(commit());
@@ -397,6 +398,49 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
         
   }
     
+    
+  @Test
+  public void testVerbMappings( ) {
+    clearIndex();
+    assertU(commit());
+    assertU( musicDocs );
+    assertU(commit());
+        
+    assertQ("", req(CommonParams.Q, "Bob Dylan Songs", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='3']" );
+        
+    assertQ("", req(CommonParams.Q, "Songs Bob Dylan wrote", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='2']" );
+        
+    assertQ("", req(CommonParams.Q, "Songs Bob Dylan performed", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='2']" );
+        
+    assertQ("", req(CommonParams.Q, "Songs Bob Dylan covered", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='1']" );
+        
+  }
+    
+  @Test
+  public void testNounPhraseMappings( ) {
+    clearIndex();
+    assertU(commit());
+    assertU( beatlesDocs );
+    assertU(commit());
+        
+    assertQ("", req(CommonParams.Q, "Beatles Songs", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='3']" );
+        
+    assertQ("", req(CommonParams.Q, "Beatles Songs covered", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='2']" );
+        
+    assertQ("", req(CommonParams.Q, "Beatles Songs covered by Joan Baez", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='1']" );
+        
+    assertQ("", req(CommonParams.Q, "Songs Beatles covered", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='1']" );
+  }
+
+    
   private static String multiValueDocs = "<add><doc><field name=\"id\">1</field><field name=\"prop_ss\">fast</field>"
                                       + "<field name=\"prop_ss\">stylish</field></doc>"
                                       + "<doc><field name=\"id\">2</field><field name=\"prop_ss\">fast</field>"
@@ -412,4 +456,31 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
                                            + "<doc><field name=\"id\">3</field><field name=\"product_type_s\">dress shirt</field>"
                                            + "<field name=\"product_category_s\">shirt</field><field name=\"color\">White</field>"
                                            + "<field name=\"material_s\">Linen</field><field name=\"consumer_type_s\">mens</field></doc></add>";
+    
+  private static String musicDocs = "<add><doc><field name=\"id\">1</field><field name=\"title_s\">All Along the Watchtower</field>"
+                                  + "<field name=\"composer_s\">Bob Dylan</field><field name=\"performer_s\">Jimi Hendrix</field>"
+                                  + "<field name=\"composition_type_s\">Song</field><field name=\"version_s\">Cover</field></doc>"
+                                  + "<doc><field name=\"id\">2</field><field name=\"title_s\">The Mighty Quinn</field>"
+                                  + "<field name=\"composer_s\">Bob Dylan</field><field name=\"performer_s\">Bob Dylan</field>"
+                                  + "<field name=\"composition_type_s\">Song</field><field name=\"version_s\">Original</field></doc>"
+                                  + "<doc><field name=\"id\">3</field><field name=\"title_s\">This Land is Your Land</field>"
+                                  + "<field name=\"composer_s\">Woody Guthrie</field><field name=\"performer_s\">Bob Dylan</field>"
+                                  + "<field name=\"composition_type_s\">Song</field><field name=\"version_s\">Cover</field></doc></add>";
+    
+  private static String beatlesDocs = "<add><doc><field name=\"id\">1</field><field name=\"title_s\">Let It Be</field>"
+                                    + "<field name=\"original_performer_s\">Beatles</field>"
+                                    + "<field name=\"performer_s\">Joan Baez</field>"
+                                    + "<field name=\"version_s\">Cover</field>"
+                                    + "<field name=\"recording_type_s\">Song</field></doc>"
+                                    + "<doc><field name=\"id\">2</field><field name=\"title_s\">Something</field>"
+                                    + "<field name=\"original_performer_s\">Beatles</field>"
+                                    + "<field name=\"performer_s\">Frank Sinatra</field>"
+                                    + "<field name=\"version_s\">Cover</field>"
+                                    + "<field name=\"recording_type_s\">Song</field></doc>"
+                                    + "<doc><field name=\"id\">3</field><field name=\"title_s\">Honey Don't</field>"
+                                    + "<field name=\"original_performer_s\">Carl Perkins</field>"
+                                    + "<field name=\"performer_s\">Beatles</field>"
+                                    + "<field name=\"version_s\">Cover</field>"
+                                    + "<field name=\"recording_type_s\">Song</field></doc></add>";
+    
 }

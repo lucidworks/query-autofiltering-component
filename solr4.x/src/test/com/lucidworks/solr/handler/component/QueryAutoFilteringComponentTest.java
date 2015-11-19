@@ -12,21 +12,31 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
     
   @BeforeClass
   public static void beforeClass() throws Exception {
+    System.out.println( "beforeClass( ) ..." );
     initCore("solrconfig-autofilter.xml","schema-autofilter.xml" );
   }
     
   @Override
   public void setUp() throws Exception {
+      System.out.println( "setUp( )" );
     super.setUp();
   }
     
   @Override
   public void tearDown() throws Exception {
+          System.out.println( "tearDown( )" );
     super.tearDown();
   }
     
   @Test
+    public void foobar( ) {
+        System.out.println( "FOO BAR!" );
+    }
+    
+
+  @Test
   public void testColors( ) {
+      System.out.println( "testColors( )..." );
     clearIndex();
     assertU(commit());
     assertU(adoc("id", "1", "color", "red",   "product", "shoes" ));
@@ -71,8 +81,10 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
               , "//*[@numFound='0']" );
   }
     
+
   @Test
   public void testSynonyms( ) {
+    System.out.println( "testSynonyms" );
     clearIndex();
     assertU(commit());
     assertU(adoc("id", "1", "color", "red",   "product", "chaise lounge" ));
@@ -100,9 +112,11 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
               , "//*[@numFound='1']"
               , "//doc[./str[@name='id']='1']" );
   }
-    
+   
+
   @Test
   public void testCaseInsensitive( ) {
+    System.out.println( "testCaseInsensitive" );
     clearIndex();
     assertU(commit());
     assertU(adoc("id", "1", "color", "red",   "product", "shoes" ));
@@ -124,6 +138,7 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
     
   @Test
   public void testSynonymsCaseInsensitive( ) {
+    System.out.println( "testSynonymsCaseInsensitive" );
     clearIndex();
     assertU(commit());
     assertU(adoc("id", "1", "color", "red",   "product", "Chaise Lounge" ));
@@ -147,6 +162,7 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
     
   @Test
   public void testStemming( ) {
+    System.out.println( "testStemming" );
     clearIndex();
     assertU(commit());
     assertU(adoc("id", "1", "color", "red",   "product", "shirt" ));
@@ -170,6 +186,7 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
     
   @Test
   public void testMinTokens( ) {
+    System.out.println( "testMinTokens" );
     clearIndex();
     assertU(commit());
     assertU(adoc("id", "1", "color", "red",   "product", "shoes" ));
@@ -193,6 +210,7 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
     
   @Test
   public void testBoostFilter(  ) {
+    System.out.println( "testBoostFilter" );
     // use autofilter handler configured with boostFactor
     clearIndex();
     assertU(commit());
@@ -232,6 +250,7 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
     
   @Test
   public void testExcludeFields(  ) {
+    System.out.println( "testExcludeFields" );
     // use autofilter handler configured with excludeFields
       clearIndex();
       assertU(commit());
@@ -253,6 +272,7 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
     
   @Test
   public void testStopWords( ) {
+    System.out.println( "testStopWords" );
     clearIndex();
     assertU(commit());
     assertU(adoc("id", "1", "color", "red",   "product", "shoes" ));
@@ -279,6 +299,7 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
     
   @Test
   public void testRandomOrder( ) {
+    System.out.println( "testRandomOrder" );
     clearIndex();
     assertU(commit());
     assertU(adoc("id", "1", "color", "red",   "product", "shoes" ));
@@ -298,6 +319,7 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
     
   @Test
   public void testBadQueries( ) {
+    System.out.println( "testBadQueries" );
     clearIndex();
     assertU(commit());
     assertU(adoc("id", "1", "color", "red",   "product", "shoes" ));
@@ -321,6 +343,7 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
     
   @Test
   public void testMultipleFieldValues( ) {
+    System.out.println( "testMultipleFieldValues" );
     clearIndex();
     assertU(commit());
     assertU(adoc("id", "1", "color", "red",   "product", "shoes" ));
@@ -339,6 +362,7 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
 
   @Test
   public void testMultipleFieldNames( ) {
+    System.out.println( "testMultipleFieldNames" );
     clearIndex();
     assertU(commit());
     //assertU(adoc("id", "1", "first_name", "Tucker", "last_name", "Thomas", "full_name", "Tucker Thomas"));
@@ -360,6 +384,7 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
     
   @Test
   public void testMultiValuedField( ) {
+    System.out.println( "testMultiValuedField" );
     clearIndex();
     assertU(commit());
     assertU( multiValueDocs );
@@ -375,7 +400,9 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
               , "//*[@numFound='3']" );
   }
     
+  @Test
   public void testAmbiguousFields( ) {
+    System.out.println( "testAmbiguousFields" );
     clearIndex();
     assertU(commit());
     assertU( whiteAmbiguousDocs );
@@ -395,6 +422,48 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
               , "//*[@numFound='1']" );
     
   }
+
+    
+  @Test
+  public void testVerbMappings( ) {
+    clearIndex();
+    assertU(commit());
+    assertU( musicDocs );
+    assertU(commit());
+        
+    assertQ("", req(CommonParams.Q, "Bob Dylan Songs", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='3']" );
+        
+    assertQ("", req(CommonParams.Q, "Songs Bob Dylan wrote", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='2']" );
+        
+    assertQ("", req(CommonParams.Q, "Songs Bob Dylan performed", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='2']" );
+        
+    assertQ("", req(CommonParams.Q, "Songs Bob Dylan covered", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='1']" );
+        
+  }
+    
+  @Test
+  public void testNounPhraseMappings( ) {
+    clearIndex();
+    assertU(commit());
+    assertU( beatlesDocs );
+    assertU(commit());
+        
+    assertQ("", req(CommonParams.Q, "Beatles Songs", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='3']" );
+        
+    assertQ("", req(CommonParams.Q, "Beatles Songs covered", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='2']" );
+        
+    assertQ("", req(CommonParams.Q, "Beatles Songs covered by Joan Baez", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='1']" );
+        
+    assertQ("", req(CommonParams.Q, "Songs Beatles covered", CommonParams.QT, "/autofilterVRB" )
+              , "//*[@numFound='1']" );
+  }
     
   private static String multiValueDocs = "<add><doc><field name=\"id\">1</field><field name=\"prop_ss\">fast</field>"
                                        + "<field name=\"prop_ss\">stylish</field></doc>"
@@ -411,4 +480,31 @@ public class QueryAutoFilteringComponentTest  extends SolrTestCaseJ4 {
                                         + "<doc><field name=\"id\">3</field><field name=\"product_type_s\">dress shirt</field>"
                                         + "<field name=\"product_category_s\">shirt</field><field name=\"color\">White</field>"
                                         + "<field name=\"material_s\">Linen</field><field name=\"consumer_type_s\">mens</field></doc></add>";
+    
+  private static String musicDocs = "<add><doc><field name=\"id\">1</field><field name=\"title_s\">All Along the Watchtower</field>"
+                                  + "<field name=\"composer_s\">Bob Dylan</field><field name=\"performer_s\">Jimi Hendrix</field>"
+                                  + "<field name=\"composition_type_s\">Song</field><field name=\"version_s\">Cover</field></doc>"
+                                  + "<doc><field name=\"id\">2</field><field name=\"title_s\">The Mighty Quinn</field>"
+                                  + "<field name=\"composer_s\">Bob Dylan</field><field name=\"performer_s\">Bob Dylan</field>"
+                                  + "<field name=\"composition_type_s\">Song</field><field name=\"version_s\">Original</field></doc>"
+                                  + "<doc><field name=\"id\">3</field><field name=\"title_s\">This Land is Your Land</field>"
+                                  + "<field name=\"composer_s\">Woody Guthrie</field><field name=\"performer_s\">Bob Dylan</field>"
+                                  + "<field name=\"composition_type_s\">Song</field><field name=\"version_s\">Cover</field></doc></add>";
+    
+  private static String beatlesDocs = "<add><doc><field name=\"id\">1</field><field name=\"title_s\">Let It Be</field>"
+                                    + "<field name=\"original_performer_s\">Beatles</field>"
+                                    + "<field name=\"performer_s\">Joan Baez</field>"
+                                    + "<field name=\"version_s\">Cover</field>"
+                                    + "<field name=\"recording_type_s\">Song</field></doc>"
+                                    + "<doc><field name=\"id\">2</field><field name=\"title_s\">Something</field>"
+                                    + "<field name=\"original_performer_s\">Beatles</field>"
+                                    + "<field name=\"performer_s\">Frank Sinatra</field>"
+                                    + "<field name=\"version_s\">Cover</field>"
+                                    + "<field name=\"recording_type_s\">Song</field></doc>"
+                                    + "<doc><field name=\"id\">3</field><field name=\"title_s\">Honey Don't</field>"
+                                    + "<field name=\"original_performer_s\">Carl Perkins</field>"
+                                    + "<field name=\"performer_s\">Beatles</field>"
+                                    + "<field name=\"version_s\">Cover</field>"
+                                    + "<field name=\"recording_type_s\">Song</field></doc></add>";
+    
 }
