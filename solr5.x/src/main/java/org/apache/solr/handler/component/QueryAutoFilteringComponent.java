@@ -98,6 +98,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     
   private String termsHandler = "/terms";
     
+  private HashSet<String> whitelistFields;;
   private HashSet<String> excludeFields;
   private HashSet<String> stopwords;
     
@@ -115,6 +116,15 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     
   @Override
   public void init( NamedList initArgs ) {
+
+    List<String> whitelistFields = (List<String>) initArgs.get("whitelistFields");
+    if (whitelistFields != null) {
+      this.whitelistFields = new HashSet<String>( );
+      for (String field : whitelistFields ) {
+          this.whitelistFields.add( field );
+      }
+    }
+
     List<String> excludeFields = (List<String>) initArgs.get("excludeFields");
     if (excludeFields != null) {
       this.excludeFields = new HashSet<String>( );
@@ -729,22 +739,34 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     
   // TODO: Filter this by the configuration fields ...
   private ArrayList<String> getStringFields( SolrIndexSearcher searcher ) {
-    IndexSchema schema = searcher.getSchema();
+
     ArrayList<String> strFields = new ArrayList<String>( );
-      
-    Collection<String> fieldNames = searcher.getFieldNames();
-    Iterator<String> fnIt = fieldNames.iterator();
-    while ( fnIt.hasNext() ) {
-      String fieldName = fnIt.next( );
-      if (excludeFields == null || !excludeFields.contains( fieldName )) {
-        SchemaField field = schema.getField(fieldName);
-        if (field.stored() && field.getType() instanceof StrField ) {
-          strFields.add( fieldName );
+    
+    if ( hasWhitelist() ) {
+      Log.info("Using whitelist fields instead of schema.");
+      for ( String fieldName: whitelistFields ) {
+        strFields.add( fieldName );
+      }
+    } else {
+      IndexSchema schema = searcher.getSchema();
+      Collection<String> fieldNames = searcher.getFieldNames();
+      Iterator<String> fnIt = fieldNames.iterator();
+      while ( fnIt.hasNext() ) {
+        String fieldName = fnIt.next( );
+        if (excludeFields == null || !excludeFields.contains( fieldName )) {
+          SchemaField field = schema.getField(fieldName);
+          if (field.stored() && field.getType() instanceof StrField ) {
+            strFields.add( fieldName );
+          }
         }
       }
     }
-      
+    
     return strFields;
+  }
+
+  private boolean hasWhitelist() {
+    return this.whitelistFields != null && this.whitelistFields.size() > 0;
   }
     
   private void addTerm( CharsRef fieldChars, String fieldValue, SynonymMap.Builder fieldBuilder, SynonymMap.Builder termBuilder ) throws IOException {
