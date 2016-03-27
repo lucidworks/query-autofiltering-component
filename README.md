@@ -2,20 +2,20 @@
 
 This project is a fork of https://github.com/lucidworks/query-autofiltering-component, but includes the following changes to the 5.x code base:
 
-* Resolved issues with Ivy dependencies
-* Upgraded component to work with SOlr 5.3.1 and above.
+* Resolved issues with Ivy dependencies.
+* Upgraded component to work with Solr 5.3.1 and above.
 * Added support for using a field whitelist. 
 
 The whilelist field definition feature was implemented to solve a gap regarding dynamic fields. Although asking the Luke admin handler would have been another implementation option, it seems that a generic whitelist is more powerful; albeit, a bit more verbose in the configuration. Simply define the following:
 
 <pre>
-    &lt;searchComponent name="autofilter" class="org.apache.solr.handler.component.QueryAutoFilteringComponent" >
-      &lt;arr name="whitelistFields">
-        &lt;str>field1&lt;/str>
-        &lt;str>field2&lt;/str>
-        &lt;str>fieldN&lt;/str>
-      &lt;/arr>
-    &lt;/searchComponent>
+ &lt;searchComponent name="autofilter" class="org.apache.solr.handler.component.QueryAutoFilteringComponent" >
+   &lt;arr name="whitelistFields">
+   &lt;str>field1&lt;/str>
+   &lt;str>field2&lt;/str>
+   &lt;str>fieldN&lt;/str>
+   &lt;/arr>
+ &lt;/searchComponent>
 </pre>
 
 # query-autofiltering-component
