@@ -804,11 +804,13 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       
     ShardHandlerFactory shardHandlerFactory = container.getShardHandlerFactory( );
     ShardHandler shardHandler = shardHandlerFactory.getShardHandler();
-    shardHandler.checkDistributed( rb );
+ 
+    final SolrParams distribParams = rb.req.getParams(); 
+    final boolean isDistrib = distribParams.get(ShardParams.SHARDS) != null;
+    Log.debug( "Is Distributed = " + isDistrib );
       
-    Log.debug( "Is Distributed = " + rb.isDistrib );
-      
-    if( rb.isDistrib ) {
+    if( isDistrib ) {
+      shardHandler.prepDistributed( rb );
       // create a ShardRequest that contains a Terms Request.
       // don't send to this shard???
       ShardRequest sreq = new ShardRequest();

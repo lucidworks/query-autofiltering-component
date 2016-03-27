@@ -20,8 +20,8 @@
   <property name="project.name" value="${ant.project.name}" />
   <property name="version.number" value="1.0.1"/>
   
-  <property name="lucene.version" value="5.1.0"/>
-  <property name="solr.version" value="5.1.0"/>
+  <property name="lucene.version" value="5.3.1"/>
+  <property name="solr.version" value="5.3.1"/>
 
   <!-- change this to include ivy download dest -->
   <target name="set-classpaths" depends="ivy-retrieve" >
