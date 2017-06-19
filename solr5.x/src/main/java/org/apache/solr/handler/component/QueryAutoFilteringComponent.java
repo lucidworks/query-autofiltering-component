@@ -479,16 +479,15 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
         }
       }
       else { // boostFactor is NOT null
-        // use the original query add fielded boost clauses
+        // use the bq field to add fielded boost clauses
         StringBuilder bbuilder = new StringBuilder( );
         String boostSuffix = "^" + boostFactor.toString( );
-        bbuilder.append( getPhrase( queryTokens, 0, queryTokens.size() - 1, " " ) );
         for (String fieldName : fieldMap.keySet( ) ) {
           bbuilder.append( " " );
           bbuilder.append( getFilterQuery( rb, fieldName, fieldMap.get( fieldName ), fieldPositionMap.get( fieldName ), queryTokens, boostSuffix ) );
         }
-        Log.info( "setting q = '" + bbuilder.toString()  + "'" );
-        modParams.set( "q", bbuilder.toString( ) );
+        Log.info( "adding bq = '" + bbuilder.toString()  + "'" );
+        modParams.add( "bq", bbuilder.toString( ).trim() );
       }
       return true;
     }
