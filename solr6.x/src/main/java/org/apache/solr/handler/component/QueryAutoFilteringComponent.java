@@ -748,8 +748,9 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       }
     } else {
       IndexSchema schema = searcher.getSchema();
-      Collection<String> fieldNames = searcher.getFieldNames();
+      Iterable<String> fieldNames = searcher.getFieldNames();
       Iterator<String> fnIt = fieldNames.iterator();
+
       while ( fnIt.hasNext() ) {
         String fieldName = fnIt.next( );
         if (excludeFields == null || !excludeFields.contains( fieldName )) {
