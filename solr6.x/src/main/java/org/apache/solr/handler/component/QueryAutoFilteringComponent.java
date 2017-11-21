@@ -1,71 +1,44 @@
 package org.apache.solr.handler.component;
 
-import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.common.params.ModifiableSolrParams;
-import org.apache.solr.common.params.CommonParams;
-import org.apache.solr.common.params.TermsParams;
-import org.apache.solr.common.params.ShardParams;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.KeywordTokenizer;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.synonym.SolrSynonymParser;
+import org.apache.lucene.analysis.synonym.SynonymMap;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.index.SortedSetDocValues;
+import org.apache.lucene.index.TermsEnum;
+import org.apache.lucene.store.ByteArrayDataInput;
+import org.apache.lucene.uninverting.UninvertingReader;
+import org.apache.lucene.util.BytesRef;
+import org.apache.lucene.util.CharsRef;
+import org.apache.lucene.util.CharsRefBuilder;
+import org.apache.lucene.util.fst.FST;
+import org.apache.solr.client.solrj.response.TermsResponse;
+import org.apache.solr.common.params.*;
 import org.apache.solr.common.util.NamedList;
-import org.apache.solr.request.SolrQueryRequest;
-
-import org.apache.solr.util.plugin.SolrCoreAware;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrCore;
-import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.core.SolrEventListener;
-
+import org.apache.solr.core.SolrResourceLoader;
+import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.StrField;
 import org.apache.solr.search.SolrIndexSearcher;
-
-import org.apache.solr.client.solrj.response.TermsResponse;
-
-import org.apache.lucene.store.ByteArrayDataInput;
-import org.apache.lucene.util.BytesRef;
-import org.apache.lucene.util.CharsRef;
-import org.apache.lucene.util.CharsRefBuilder;
-import org.apache.lucene.index.LeafReader;
-import org.apache.lucene.uninverting.UninvertingReader;
-import org.apache.lucene.index.SortedSetDocValues;
-import org.apache.lucene.index.TermsEnum;
-import org.apache.lucene.index.Term;
-
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.core.KeywordTokenizer;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
-import org.apache.lucene.analysis.synonym.SynonymMap;
-import org.apache.lucene.analysis.synonym.SynonymMap.Builder;
-import org.apache.lucene.analysis.synonym.SolrSynonymParser;
-import org.apache.lucene.analysis.util.TokenFilterFactory;
-import org.apache.lucene.analysis.util.TokenizerFactory;
-import org.apache.lucene.analysis.standard.StandardTokenizer;
-
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.util.fst.FST;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.StringTokenizer;
-
+import org.apache.solr.util.plugin.SolrCoreAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.BufferedReader;
 import java.io.StringReader;
-import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * Creates filter or boost queries from freetext queries based on pattern matches with terms in stored String fields. Uses
@@ -116,7 +89,6 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     
   @Override
   public void init( NamedList initArgs ) {
-
     List<String> whitelistFields = (List<String>) initArgs.get("whitelistFields");
     if (whitelistFields != null) {
       this.whitelistFields = new HashSet<String>( );
@@ -132,7 +104,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
           this.excludeFields.add( field );
       }
     }
-      
+
     List<String> verbModifiers = (List<String>)initArgs.get( "verbModifiers" );
     if (verbModifiers != null) {
       this.verbModifierList = new ArrayList<ModifierDefinition>( );
@@ -151,7 +123,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
         }
       }
     }
-      
+
     Integer boostFactor = (Integer)initArgs.get( "boostFactor" );
     if (boostFactor != null) {
       this.boostFactor = boostFactor;
@@ -226,7 +198,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
   public void inform( SolrCore core ) {
     if (initParams != null) {
       SolrResourceLoader resourceLoader = core.getResourceLoader( );
-        
+
       synonymsFile = (String)initParams.get( "synonyms" );
       if (synonymsFile != null) {
         Analyzer analyzer = new Analyzer() {
@@ -236,12 +208,12 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
             return new TokenStreamComponents(tokenizer, tokenizer );
           }
         };
-                
+
         try {
           SolrSynonymParser parser = new SolrSynonymParser(true, true, analyzer);
           CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
                                                                       .onUnmappableCharacter(CodingErrorAction.REPORT);
-                    
+
           parser.parse(new InputStreamReader( resourceLoader.openResource(synonymsFile), decoder));
           this.synonyms = parser.build( );
         }
@@ -250,7 +222,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
           Log.warn( "Parsing Synonyms Got Exception " + e );
         }
       }
-        
+
       String stopwordsFile = (String)initParams.get( "stopwords" );
       if (stopwordsFile != null) {
         this.stopwords = new HashSet<String>( );
@@ -267,7 +239,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
         }
       }
     }
-      
+
     core.registerFirstSearcherListener( this );
     core.registerNewSearcherListener( this );
   }
@@ -289,7 +261,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
   {
     SolrQueryRequest req = rb.req;
     SolrParams params = req.getParams( );
-      
+
     // Only build the field map and do the processing if we are the main event
     String isShard = params.get( "isShard" );
     if (isShard != null && isShard.equals( "true" )) {
@@ -335,7 +307,23 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       }
     }
   }
-    
+
+  /**
+   * If this method is not overridden then this will cause a request against
+   * the Shards causing performance degredation and duplicate values in the
+   * facet counts.
+   * Here we just return that this is done leaving it up to the Query to drive
+   * the requests.
+   *
+   * @param rb Ignored
+   * @return ResponseBuilder.STAGE_DONE
+   * @throws IOException never thrown
+   */
+  @Override
+  public int distributedProcess(ResponseBuilder rb) throws IOException {
+    return ResponseBuilder.STAGE_DONE;
+  }
+
   private boolean findPattern( ArrayList<char[]> queryTokens, ResponseBuilder rb, ModifiableSolrParams modParams ) throws IOException {
     Log.debug( "findPattern " );
 
@@ -343,14 +331,14 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     HashMap<String,ArrayList<String>> fieldMap = new HashMap<String,ArrayList<String>>( );
     HashMap<String,int[]> fieldPositionMap = new HashMap<String,int[]>( );
     HashMap<String,int[]> entityPositionMap = (verbModifierList != null) ? new HashMap<String,int[]>()  : null;
-      
+
     String longestPhraseField = null;
     int startToken = 0;
     int lastEndToken = 0;
     while ( startToken < queryTokens.size() ) {
       Log.debug( "startToken = " + startToken );
       int endToken = startToken;
-        
+
       while ( endToken < queryTokens.size( ) ) {
         // FieldName can be comma separated if there are more than one field name for a set of tokens
         String fieldName = getFieldNameFor( queryTokens, startToken, endToken );
@@ -363,7 +351,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
         }
         ++endToken;
       }
-        
+
       if (longestPhraseField != null) {
         // create matching phrase from startToken -> endToken
         String phrase = getPhrase( queryTokens, startToken, lastEndToken );
@@ -382,7 +370,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
             valList = new ArrayList<String>( );
             fieldMap.put( longestPhraseField, valList );
           }
-            
+
           Log.info( "indexedTerm: " + indexedTerm );
           int[] entityPosition = null;
           if (entityPositionMap != null) {
@@ -390,7 +378,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
             entityPosition[0] = startToken;
             entityPosition[1] = endToken-1;
           }
-          
+
           Log.debug( "indexedTerm: " + indexedTerm );
           if (indexedTerm.indexOf( fieldDelim ) > 0)
           {
@@ -404,7 +392,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
             valList.add( indexedTerm );
             if (entityPositionMap != null) entityPositionMap.put( indexedTerm, entityPosition );
           }
-            
+
           // save startToken and lastEndToken so can use for boolean operator context
           // for multi-value fields -save the min and max of all tokens positions for the field
           int[] posArray = fieldPositionMap.get( longestPhraseField );
@@ -419,7 +407,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
           {
             posArray[1] = lastEndToken;
           }
-            
+
           longestPhraseField = null;
           for (int i = startToken; i <= lastEndToken; i++) {
             Log.debug( "adding used token at " + i );
@@ -432,14 +420,14 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
         ++startToken;
       }
     }
-      
+
     if (usedTokens.size( ) > 0) {
-        
+
       // filter field maps based on verbs here:
       if (entityPositionMap != null) {
         filterFieldMap( queryTokens, fieldMap, entityPositionMap, fieldPositionMap );
       }
-        
+
       String useBoost = modParams.get( BOOST_PARAM );
       Integer boostFactor = (useBoost != null) ? new Integer( useBoost ) : this.boostFactor;
       if (boostFactor == null) {
@@ -453,7 +441,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
             }
           }
         }
-          
+
         Log.debug( "got qbuilder string = '" + qbuilder.toString() + "'" );
         if (qbuilder.length() == 0 && fieldMap.size() > 0) {
           // build a filter query -
@@ -491,7 +479,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       }
       return true;
     }
-    
+
     return false;
   }
     
@@ -502,7 +490,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
   private String getPhrase( ArrayList<char[]> tokens, int startToken, int endToken, String tokenSep ) {
     StringBuilder strb = new StringBuilder( );
     for (int i = startToken; i <= endToken; i++) {
-      if (i > startToken) strb.append( tokenSep );
+      if (i > startToken) { strb.append( tokenSep ); }
 
       strb.append( tokens.get( i ) );
     }
@@ -584,7 +572,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
   }
     
   private String getSingleTermQuery( String multiTermValue ) {
-        
+
     String multiTerm = multiTermValue;
     if (multiTermValue.startsWith( "\"" )) {
       multiTerm = new String( multiTermValue.substring( 1, multiTermValue.lastIndexOf( "\"" )));
@@ -748,8 +736,9 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       }
     } else {
       IndexSchema schema = searcher.getSchema();
-      Collection<String> fieldNames = searcher.getFieldNames();
+      Iterable<String> fieldNames = searcher.getFieldNames();
       Iterator<String> fnIt = fieldNames.iterator();
+
       while ( fnIt.hasNext() ) {
         String fieldName = fnIt.next( );
         if (excludeFields == null || !excludeFields.contains( fieldName )) {
@@ -984,7 +973,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
   public int stem(char s[], int len) {
     if (len < 3 || s[len-1] != 's')
       return len;
-        
+
     switch(s[len-2]) {
       case 'u':
       case 's': return len;
@@ -1040,7 +1029,7 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
   // ===========================================================================
   private void filterFieldMap( ArrayList<char[]> queryTokens, HashMap<String,ArrayList<String>> fieldMap,
                                HashMap<String,int[]> entityPositionMap, HashMap<String,int[]> fieldPositionMap ) {
-        
+
     Log.info( "filterFieldMap" );
     // need to find the modifiers that are in THIS set of tokens by position, in the order used ...
     ArrayList<ModifierInstance> usedModifiers = getOrderedModifierPositions( queryTokens );
