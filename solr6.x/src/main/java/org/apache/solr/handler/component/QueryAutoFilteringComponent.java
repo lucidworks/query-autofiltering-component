@@ -685,8 +685,9 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
     } else {
       Log.debug("Finite State Machine is null on Synonym Map -> ignored");
     }
-      
-    Log.warn( "matchOutput but no FieldName for " + phrase );
+     
+    // Surpressing this message since it is very chatty in production. 
+    Log.debug( "matchOutput but no FieldName for " + phrase );
     return null;
   }
 
