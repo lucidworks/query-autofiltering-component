@@ -622,68 +622,72 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
   private String getMappedFieldName( SynonymMap termMap, String phrase ) throws IOException {
     Log.debug( "getMappedFieldName: '" + phrase + "'" );
     FST<BytesRef> fst = termMap.fst;
-    FST.BytesReader fstReader = fst.getBytesReader();
-    FST.Arc<BytesRef> scratchArc = new FST.Arc<>( );
-    BytesRef scratchBytes = new BytesRef();
-    CharsRefBuilder scratchChars = new CharsRefBuilder();
-    ByteArrayDataInput bytesReader = new ByteArrayDataInput();
-        
-    BytesRef pendingOutput = fst.outputs.getNoOutput();
-    fst.getFirstArc( scratchArc );
-    BytesRef matchOutput = null;
-      
-    String noSpPhrase = phrase.replace( ' ', '_' );
-    int charPos = 0;
-    while(charPos < noSpPhrase.length()) {
-      final int codePoint = noSpPhrase.codePointAt( charPos );
-      if (fst.findTargetArc( codePoint, scratchArc, scratchArc, fstReader) == null) {
-        Log.debug( "No FieldName for " + phrase );
-        return null;
-      }
-                
-      pendingOutput = fst.outputs.add(pendingOutput, scratchArc.output);
-      charPos += Character.charCount(codePoint);
-    }
+    if(fst != null) {
+      FST.BytesReader fstReader = fst.getBytesReader();
+      FST.Arc<BytesRef> scratchArc = new FST.Arc<>();
+      BytesRef scratchBytes = new BytesRef();
+      CharsRefBuilder scratchChars = new CharsRefBuilder();
+      ByteArrayDataInput bytesReader = new ByteArrayDataInput();
 
-    if (scratchArc.isFinal()) {
-      Log.debug( "creating matchOutput" );
-      matchOutput = fst.outputs.add(pendingOutput, scratchArc.nextFinalOutput);
-      ArrayList<String> mappedFields = new ArrayList<String>( );
-      bytesReader.reset( matchOutput.bytes, matchOutput.offset, matchOutput.length );
-            
-      final int code = bytesReader.readVInt();
-      final int count = code >>> 1;
-      for( int outputIDX = 0; outputIDX < count; outputIDX++ ) {
-        termMap.words.get( bytesReader.readVInt(), scratchBytes );
-        scratchChars.copyUTF8Bytes(scratchBytes);
-        int lastStart = 0;
-        final int chEnd = lastStart + scratchChars.length();
-        for( int chIDX = lastStart; chIDX <= chEnd; chIDX++ ) {
-          if (chIDX == chEnd || scratchChars.charAt(chIDX) == SynonymMap.WORD_SEPARATOR) {
-            int outputLen = chIDX - lastStart;
-            assert outputLen > 0: "output contains empty string: " + scratchChars;
-            mappedFields.add( new String( scratchChars.chars(), lastStart, outputLen ) );
-            lastStart = chIDX + 1;
+      BytesRef pendingOutput = fst.outputs.getNoOutput();
+      fst.getFirstArc(scratchArc);
+      BytesRef matchOutput = null;
+
+      String noSpPhrase = phrase.replace(' ', '_');
+      int charPos = 0;
+      while (charPos < noSpPhrase.length()) {
+        final int codePoint = noSpPhrase.codePointAt(charPos);
+        if (fst.findTargetArc(codePoint, scratchArc, scratchArc, fstReader) == null) {
+          Log.debug("No FieldName for " + phrase);
+          return null;
+        }
+
+        pendingOutput = fst.outputs.add(pendingOutput, scratchArc.output);
+        charPos += Character.charCount(codePoint);
+      }
+
+      if (scratchArc.isFinal()) {
+        Log.debug("creating matchOutput");
+        matchOutput = fst.outputs.add(pendingOutput, scratchArc.nextFinalOutput);
+        ArrayList<String> mappedFields = new ArrayList<String>();
+        bytesReader.reset(matchOutput.bytes, matchOutput.offset, matchOutput.length);
+
+        final int code = bytesReader.readVInt();
+        final int count = code >>> 1;
+        for (int outputIDX = 0; outputIDX < count; outputIDX++) {
+          termMap.words.get(bytesReader.readVInt(), scratchBytes);
+          scratchChars.copyUTF8Bytes(scratchBytes);
+          int lastStart = 0;
+          final int chEnd = lastStart + scratchChars.length();
+          for (int chIDX = lastStart; chIDX <= chEnd; chIDX++) {
+            if (chIDX == chEnd || scratchChars.charAt(chIDX) == SynonymMap.WORD_SEPARATOR) {
+              int outputLen = chIDX - lastStart;
+              assert outputLen > 0 : "output contains empty string: " + scratchChars;
+              mappedFields.add(new String(scratchChars.chars(), lastStart, outputLen));
+              lastStart = chIDX + 1;
+            }
           }
         }
-      }
 
-      if (mappedFields.size() == 1) {
-        Log.debug( "returning mapped fieldName " + mappedFields.get( 0 ) );
-        return mappedFields.get( 0 );
-      }
-      else {
-        StringBuilder fieldBuilder = new StringBuilder( );
-        for (String fieldName : mappedFields ) {
-          if (fieldBuilder.length() > 0) fieldBuilder.append( fieldDelim );
-          fieldBuilder.append( fieldName );
+        if (mappedFields.size() == 1) {
+          Log.debug("returning mapped fieldName " + mappedFields.get(0));
+          return mappedFields.get(0);
+        } else {
+          StringBuilder fieldBuilder = new StringBuilder();
+          for (String fieldName : mappedFields) {
+            if (fieldBuilder.length() > 0) fieldBuilder.append(fieldDelim);
+            fieldBuilder.append(fieldName);
+          }
+          Log.debug("returning mapped fieldName " + fieldBuilder.toString());
+          return fieldBuilder.toString();
         }
-        Log.debug( "returning mapped fieldName " + fieldBuilder.toString( ) );
-        return fieldBuilder.toString( );
       }
+    } else {
+      Log.debug("Finite State Machine is null on Synonym Map -> ignored");
     }
-      
-    Log.warn( "matchOutput but no FieldName for " + phrase );
+     
+    // Surpressing this message since it is very chatty in production. 
+    Log.debug( "matchOutput but no FieldName for " + phrase );
     return null;
   }
 
