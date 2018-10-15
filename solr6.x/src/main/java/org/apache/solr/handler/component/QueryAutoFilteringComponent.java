@@ -1,5 +1,6 @@
 package org.apache.solr.handler.component;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.KeywordTokenizer;
@@ -718,7 +719,9 @@ public class QueryAutoFilteringComponent extends QueryComponent implements SolrC
       while (te.next() != null) {
         BytesRef term = te.term();
         String fieldValue = term.utf8ToString( );
-        addTerm ( fieldChars, fieldValue, fieldBuilder, termBuilder );
+        if (StringUtils.isNotEmpty(fieldValue)) {
+          addTerm ( fieldChars, fieldValue, fieldBuilder, termBuilder );
+        }
       }
     }
       
